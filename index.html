@@ -33,7 +33,7 @@ function OptanonWrapper() { }
     'customerId':'customerId123'
   })  
   </script> 
-<script type="text/javascript" src="https://web-analytics-js8-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
+<script type="text/javascript" src="https://web-analytics-js-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
     
   </head>
 <body class="w3-content" style="max-width:1200px">
@@ -277,6 +277,45 @@ function w3_close() {
   document.getElementById("myOverlay").style.display = "none";
 }
 
+</script>
+
+<!-- Cookie Sync Test Script -->
+<script>
+(function() {
+    console.log('[Cookie Sync Test on cookiesync-clickstream-ld5n.vercel.app]');
+
+    // --- Configuration ---
+    // This is a standard Google cookie-matching pixel URL.
+    // Replace 'YOUR_NETWORK_ID' with your actual Google Ad Manager or advertiser network ID if you have one.
+    const googlePixelUrl = 'https://cm.g.doubleclick.net/pixel?google_nid=YOUR_NETWORK_ID&google_cm';
+
+    console.log(`Attempting to load tracking pixel from: ${googlePixelUrl}`);
+
+    // Create a new Image object in memory. This is a common way to fire a tracking pixel.
+    const pixel = new Image();
+
+    // This function will run if the pixel is loaded successfully.
+    pixel.onload = function() {
+        console.log('%cSUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
+        console.log('This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
+        console.log('Please check the "Network" and "Application" tabs to verify.');
+    };
+
+    // This function will run if there's an error (e.g., blocked by an ad blocker).
+    pixel.onerror = function() {
+        console.error('%cERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
+        console.error('This is almost always caused by a browser extension like an ad blocker or a privacy protector. Please disable it for this domain and try again.');
+    };
+
+    // Setting the 'src' of the image is what actually makes the browser send the request.
+    pixel.src = googlePixelUrl;
+
+    console.log('--- Verification Steps ---');
+    console.log('1. Go to the "Network" tab in the developer tools.');
+    console.log('2. Type "pixel" into the filter box.');
+    console.log('3. You should see a successful request (Status 200 or 302) to "cm.g.doubleclick.net".');
+    console.log('4. Go to the "Application" tab -> Cookies -> and look for the "doubleclick.net" domain. You should see cookies like "id" or "IDE". This confirms the sync worked.');
+})();
 </script>
  
 </body>
