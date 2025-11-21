@@ -170,7 +170,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- Cookie Sync Test Status Section -->
   <div class="w3-container w3-light-grey w3-padding-16" id="cookieSyncStatus" style="margin-top: 20px;">
-    <h3> Cookie Sync Test</h3>
+    <h3>🍪 Cookie Sync Test</h3>
     <p id="cookieSyncMessage">Testing cookie sync... Check browser console (F12) for detailed logs.</p>
     <p><small>Open Developer Tools (F12) → Console tab to see test results</small></p>
   </div>
@@ -286,7 +286,7 @@ function w3_close() {
 
 </script>
 
-<!-- Complete Cookie Sync Implementation -->
+<!-- Client-Side Cookie Sync Implementation -->
 <script>
 (function() {
     'use strict';
@@ -299,21 +299,14 @@ function w3_close() {
     const statusMessage = document.getElementById('cookieSyncMessage');
 
     // --- Configuration ---
-    const CONFIG = {
-        // Google Ad Manager Network ID - Replace with your actual network ID
-        // Format: '168-628-5891' or your network ID
-        googleNetworkId: '168-628-5891', // You can change this to your network ID
-        
-        // Backend endpoints
-        backendBaseUrl: 'https://web-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com',
-        syncEndpoint: '/sendevent',
-        
-        // Cookie names
-        userIdCookie: 'userID',
-        syncDoneFlag: 'cookieSyncDone'
-    };
+    // Replace 'YOUR_NETWORK_ID' with your actual Google Ad Manager or advertiser network ID
+    // Example: '168-628-5891' or your network ID
+    const GOOGLE_NETWORK_ID = '168-628-5891'; // Change this to your network ID
+    
+    // Build the Google cookie-matching pixel URL
+    const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
 
-    // Update status message
+    // Update status message on page
     function updateStatus(message, type = 'info') {
         if (statusMessage) {
             statusMessage.innerHTML = message;
@@ -330,253 +323,70 @@ function w3_close() {
                 statusDiv.className += ' w3-light-grey';
             }
         }
-        console.log(`[Cookie Sync] ${message}`);
     }
 
-    // Get cookie by name
-    function getCookie(name) {
-        try {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [key, value] = cookie.split('=');
-                if (key.trim() === name.trim()) {
-                    return decodeURIComponent(value);
-                }
+    // Perform client-side cookie sync
+    function performCookieSync() {
+        console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
+        updateStatus(' Loading Google tracking pixel...', 'info');
+
+        // Create a new Image object - this is the standard way to fire a tracking pixel
+        const pixel = new Image();
+
+        // This function runs if the pixel loads successfully
+        pixel.onload = function() {
+            console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
+            console.log('[Cookie Sync] This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
+            console.log('[Cookie Sync] Please check the "Network" and "Application" tabs to verify.');
+            
+            updateStatus(' <strong>SUCCESS:</strong> Tracking pixel loaded! Cookie sync completed.<br><small>Check Network and Application tabs in DevTools to verify cookies were set.</small>', 'success');
+            
+            // Log verification steps
+            console.log('[Cookie Sync] --- Verification Steps ---');
+            console.log('[Cookie Sync] 1. Go to the "Network" tab in the developer tools.');
+            console.log('[Cookie Sync] 2. Type "pixel" into the filter box.');
+            console.log('[Cookie Sync] 3. You should see a successful request (Status 200 or 302) to "cm.g.doubleclick.net".');
+            console.log('[Cookie Sync] 4. Go to the "Application" tab -> Cookies -> and look for the "doubleclick.net" domain.');
+            console.log('[Cookie Sync] 5. You should see cookies like "id" or "IDE". This confirms the sync worked.');
+        };
+
+        // This function runs if there's an error (e.g., blocked by an ad blocker)
+        pixel.onerror = function() {
+            console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
+            console.error('[Cookie Sync] This is almost always caused by a browser extension like an ad blocker or a privacy protector.');
+            console.error('[Cookie Sync] Please disable it for this domain and try again.');
+            
+            updateStatus(' <strong>ERROR:</strong> Pixel request blocked.<br><small>Disable ad blockers and privacy extensions, then refresh the page.</small>', 'error');
+        };
+
+        // Setting the 'src' of the image is what actually makes the browser send the request
+        // This is the critical part - the browser makes a client-side request to Google
+        // Google's server responds and sets cookies on the doubleclick.net domain
+        pixel.src = googlePixelUrl;
+
+        // Optional: Set a timeout to detect if pixel is taking too long
+        setTimeout(function() {
+            if (!pixel.complete) {
+                console.warn('[Cookie Sync]  Pixel load is taking longer than expected...');
             }
-            return null;
-        } catch (error) {
-            console.error('[Cookie Sync] Error getting cookie:', error);
-            return null;
-        }
-    }
-
-    // Set cookie
-    function setCookie(name, value, days = 365) {
-        try {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            const expires = "expires=" + date.toUTCString();
-            const secure = window.location.protocol === 'https:' ? "Secure" : "";
-            document.cookie = `${name}=${encodeURIComponent(value)};${expires};path=/;${secure};SameSite=Lax`;
-        } catch (error) {
-            console.error('[Cookie Sync] Error setting cookie:', error);
-        }
-    }
-
-    // Generate unique user ID
-    function generateUserId() {
-        try {
-            const randomPart = crypto.randomUUID();
-            const timestampPart = Math.floor(Date.now() / 1000).toString(16);
-            return `${randomPart}.${timestampPart}`;
-        } catch (error) {
-            // Fallback if crypto.randomUUID is not available
-            return `${Date.now()}.${Math.random().toString(36).substr(2, 9)}`;
-        }
-    }
-
-    // Get or create user ID
-    function getOrCreateUserId() {
-        let userId = getCookie(CONFIG.userIdCookie);
-        if (!userId) {
-            userId = generateUserId();
-            setCookie(CONFIG.userIdCookie, userId, 365);
-            console.log('[Cookie Sync] Generated new user ID:', userId);
-        } else {
-            console.log('[Cookie Sync] Using existing user ID:', userId);
-        }
-        return userId;
-    }
-
-    // Step 1: Load Google pixel to trigger cookie sync on Google's side
-    function loadGooglePixel() {
-        return new Promise((resolve, reject) => {
-            const pixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${CONFIG.googleNetworkId}&google_cm=1`;
-            console.log('[Cookie Sync] Loading Google pixel:', pixelUrl);
-            
-            const pixel = new Image();
-            
-            pixel.onload = function() {
-                console.log('[Cookie Sync]  Google pixel loaded successfully');
-                resolve(true);
-            };
-            
-            pixel.onerror = function() {
-                console.warn('[Cookie Sync]  Google pixel failed to load (may be blocked by ad blocker)');
-                // Don't reject - continue with sync even if pixel fails
-                resolve(false);
-            };
-            
-            // Set timeout to avoid hanging
-            setTimeout(() => {
-                if (!pixel.complete) {
-                    console.warn('[Cookie Sync]  Google pixel load timeout');
-                    resolve(false);
-                }
-            }, 5000);
-            
-            pixel.src = pixelUrl;
-        });
-    }
-
-    // Step 2: Fetch Google GID from backend proxy
-    async function fetchGoogleGid() {
-        try {
-            updateStatus(' Fetching Google GID...', 'info');
-            
-            // Try relative path first (if backend is on same domain)
-            let proxyUrl = `/api/get-google-gid?bidder_nid=${CONFIG.googleNetworkId}`;
-            
-            try {
-                const response = await fetch(proxyUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.google_gid) {
-                        console.log('[Cookie Sync] Google GID obtained:', data.google_gid);
-                        return data.google_gid;
-                    } else if (data.success && data.google_gid === null) {
-                        console.log('[Cookie Sync]  Google GID not available (normal for new users)');
-                        return null;
-                    }
-                }
-            } catch (relativeError) {
-                console.log('[Cookie Sync] Relative path failed, trying absolute URL...');
-            }
-
-            // Fallback to absolute URL
-            proxyUrl = `${CONFIG.backendBaseUrl}/api/get-google-gid?bidder_nid=${CONFIG.googleNetworkId}`;
-            const response = await fetch(proxyUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data.success) {
-                if (data.google_gid) {
-                    console.log('[Cookie Sync]  Google GID obtained:', data.google_gid);
-                    return data.google_gid;
-                } else {
-                    console.log('[Cookie Sync]  Google GID not available (normal for new users)');
-                    return null;
-                }
-            } else {
-                throw new Error(data.error || 'Failed to get Google GID');
-            }
-        } catch (error) {
-            console.error('[Cookie Sync]  Error fetching Google GID:', error);
-            // Continue with sync even if GID fetch fails
-            return null;
-        }
-    }
-
-    // Step 3: Send sync data to backend
-    async function sendSyncToBackend(userId, googleGid) {
-        try {
-            updateStatus('🔄 Sending sync data to backend...', 'info');
-            
-            const syncData = {
-                eventName: 'cookieSync',
-                userId: userId,
-                googleGid: googleGid,
-                timestamp: new Date().toISOString(),
-                domain: currentDomain
-            };
-
-            console.log('[Cookie Sync] Sending sync data:', syncData);
-
-            const syncUrl = `${CONFIG.backendBaseUrl}${CONFIG.syncEndpoint}`;
-            
-            const response = await fetch(syncUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': '12345abc'
-                },
-                body: JSON.stringify(syncData)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('[Cookie Sync]  Sync data sent successfully:', result);
-                return true;
-            } else {
-                const errorText = await response.text();
-                throw new Error(`Backend error: ${response.status} - ${errorText}`);
-            }
-        } catch (error) {
-            console.error('[Cookie Sync]  Error sending sync data:', error);
-            throw error;
-        }
-    }
-
-    // Main cookie sync function
-    async function performCookieSync() {
-        try {
-            // Check if sync already done in this session
-            const syncDone = sessionStorage.getItem(CONFIG.syncDoneFlag);
-            if (syncDone === 'true') {
-                console.log('[Cookie Sync]  Cookie sync already performed in this session');
-                updateStatus(' Cookie sync already completed in this session', 'info');
-                return;
-            }
-
-            updateStatus(' Starting cookie sync process...', 'info');
-
-            // Step 1: Get or create user ID
-            const userId = getOrCreateUserId();
-            console.log('[Cookie Sync] User ID:', userId);
-
-            // Step 2: Load Google pixel (triggers cookie sync on Google's side)
-            await loadGooglePixel();
-
-            // Step 3: Fetch Google GID from backend proxy
-            const googleGid = await fetchGoogleGid();
-
-            // Step 4: Send sync data to backend
-            await sendSyncToBackend(userId, googleGid);
-
-            // Mark sync as done
-            sessionStorage.setItem(CONFIG.syncDoneFlag, 'true');
-
-            // Success!
-            updateStatus(' <strong>Cookie sync completed successfully!</strong><br><small>User ID: ' + userId + (googleGid ? '<br>Google GID: ' + googleGid : '<br>Google GID: Not available (normal for new users)') + '</small>', 'success');
-
-            console.log('[Cookie Sync]  Cookie synchronization completed successfully!');
-            console.log('[Cookie Sync] User ID:', userId);
-            console.log('[Cookie Sync] Google GID:', googleGid || 'Not available');
-
-        } catch (error) {
-            console.error('[Cookie Sync]  Cookie sync failed:', error);
-            updateStatus(' <strong>Cookie sync failed:</strong> ' + error.message, 'error');
-        }
+        }, 10000);
     }
 
     // Auto-start cookie sync when page loads
-    // You can also call performCookieSync() manually if needed
+    // This ensures cookie sync happens automatically
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', performCookieSync);
     } else {
-        // DOM already loaded
+        // DOM already loaded, run immediately
         performCookieSync();
     }
 
-    // Expose function globally for manual triggering
+    // Expose function globally for manual triggering if needed
     window.performCookieSync = performCookieSync;
 
     console.log('[Cookie Sync] Cookie sync script loaded. Sync will start automatically.');
     console.log('[Cookie Sync] To manually trigger sync, call: window.performCookieSync()');
+    console.log('[Cookie Sync] Pixel URL:', googlePixelUrl);
 })();
 </script>
  
