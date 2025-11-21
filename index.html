@@ -170,7 +170,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- Cookie Sync Test Status Section -->
   <div class="w3-container w3-light-grey w3-padding-16" id="cookieSyncStatus" style="margin-top: 20px;">
-    <h3>🍪 Cookie Sync Test</h3>
+    <h3> Cookie Sync Test</h3>
     <p id="cookieSyncMessage">Testing cookie sync... Check browser console (F12) for detailed logs.</p>
     <p><small>Open Developer Tools (F12) → Console tab to see test results</small></p>
   </div>
@@ -336,26 +336,12 @@ function w3_close() {
         // This function runs if the pixel loads successfully
         pixel.onload = function() {
             console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
-            console.log('[Cookie Sync] This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
-            console.log('[Cookie Sync] Please check the "Network" and "Application" tabs to verify.');
-            
             updateStatus(' <strong>SUCCESS:</strong> Tracking pixel loaded! Cookie sync completed.<br><small>Check Network and Application tabs in DevTools to verify cookies were set.</small>', 'success');
-            
-            // Log verification steps
-            console.log('[Cookie Sync] --- Verification Steps ---');
-            console.log('[Cookie Sync] 1. Go to the "Network" tab in the developer tools.');
-            console.log('[Cookie Sync] 2. Type "pixel" into the filter box.');
-            console.log('[Cookie Sync] 3. You should see a successful request (Status 200 or 302) to "cm.g.doubleclick.net".');
-            console.log('[Cookie Sync] 4. Go to the "Application" tab -> Cookies -> and look for the "doubleclick.net" domain.');
-            console.log('[Cookie Sync] 5. You should see cookies like "id" or "IDE". This confirms the sync worked.');
         };
 
         // This function runs if there's an error (e.g., blocked by an ad blocker)
         pixel.onerror = function() {
             console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
-            console.error('[Cookie Sync] This is almost always caused by a browser extension like an ad blocker or a privacy protector.');
-            console.error('[Cookie Sync] Please disable it for this domain and try again.');
-            
             updateStatus(' <strong>ERROR:</strong> Pixel request blocked.<br><small>Disable ad blockers and privacy extensions, then refresh the page.</small>', 'error');
         };
 
@@ -383,10 +369,6 @@ function w3_close() {
 
     // Expose function globally for manual triggering if needed
     window.performCookieSync = performCookieSync;
-
-    console.log('[Cookie Sync] Cookie sync script loaded. Sync will start automatically.');
-    console.log('[Cookie Sync] To manually trigger sync, call: window.performCookieSync()');
-    console.log('[Cookie Sync] Pixel URL:', googlePixelUrl);
 })();
 </script>
  
