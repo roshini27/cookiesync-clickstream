@@ -168,6 +168,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
+  <!-- Cookie Sync Test Status Section -->
+  <div class="w3-container w3-light-grey w3-padding-16" id="cookieSyncStatus" style="margin-top: 20px;">
+    <h3>🍪 Cookie Sync Test</h3>
+    <p id="cookieSyncMessage">Testing cookie sync... Check browser console (F12) for detailed logs.</p>
+    <p><small>Open Developer Tools (F12) → Console tab to see test results</small></p>
+  </div>
+
   <!-- Subscribe section -->
   <div class="w3-container w3-black w3-padding-32">
     <h1>Subscribe</h1>
@@ -282,14 +289,23 @@ function w3_close() {
 <!-- Cookie Sync Test Script -->
 <script>
 (function() {
-    console.log('[Cookie Sync Test on cookiesync-clickstream-ld5n.vercel.app]');
+    const currentDomain = window.location.hostname;
+    console.log(`[Cookie Sync Test on ${currentDomain}]`);
+
+    // Get status elements for visual feedback
+    const statusDiv = document.getElementById('cookieSyncStatus');
+    const statusMessage = document.getElementById('cookieSyncMessage');
 
     // --- Configuration ---
     // This is a standard Google cookie-matching pixel URL.
     // Replace 'YOUR_NETWORK_ID' with your actual Google Ad Manager or advertiser network ID if you have one.
+    // For testing purposes, you can also try without a network ID or use a test network ID
     const googlePixelUrl = 'https://cm.g.doubleclick.net/pixel?google_nid=YOUR_NETWORK_ID&google_cm';
 
     console.log(`Attempting to load tracking pixel from: ${googlePixelUrl}`);
+    if (statusMessage) {
+        statusMessage.textContent = `Testing: ${googlePixelUrl}`;
+    }
 
     // Create a new Image object in memory. This is a common way to fire a tracking pixel.
     const pixel = new Image();
@@ -299,12 +315,22 @@ function w3_close() {
         console.log('%cSUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
         console.log('This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
         console.log('Please check the "Network" and "Application" tabs to verify.');
+        
+        if (statusDiv && statusMessage) {
+            statusDiv.className = 'w3-container w3-green w3-padding-16';
+            statusMessage.innerHTML = '✅ <strong>SUCCESS:</strong> Tracking pixel loaded! Check Network tab for request details.';
+        }
     };
 
     // This function will run if there's an error (e.g., blocked by an ad blocker).
     pixel.onerror = function() {
         console.error('%cERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
         console.error('This is almost always caused by a browser extension like an ad blocker or a privacy protector. Please disable it for this domain and try again.');
+        
+        if (statusDiv && statusMessage) {
+            statusDiv.className = 'w3-container w3-red w3-padding-16';
+            statusMessage.innerHTML = '❌ <strong>ERROR:</strong> Pixel request blocked. Disable ad blockers and try again.';
+        }
     };
 
     // Setting the 'src' of the image is what actually makes the browser send the request.
