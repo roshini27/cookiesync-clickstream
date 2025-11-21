@@ -168,13 +168,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
-  <!-- Cookie Sync Test Status Section -->
-  <div class="w3-container w3-light-grey w3-padding-16" id="cookieSyncStatus" style="margin-top: 20px;">
-    <h3> Cookie Sync Test</h3>
-    <p id="cookieSyncMessage">Testing cookie sync... Check browser console (F12) for detailed logs.</p>
-    <p><small>Open Developer Tools (F12) → Console tab to see test results</small></p>
-  </div>
-
   <!-- Subscribe section -->
   <div class="w3-container w3-black w3-padding-32">
     <h1>Subscribe</h1>
@@ -294,10 +287,6 @@ function w3_close() {
     const currentDomain = window.location.hostname;
     console.log(`[Cookie Sync] Initializing on ${currentDomain}`);
 
-    // Get status elements for visual feedback
-    const statusDiv = document.getElementById('cookieSyncStatus');
-    const statusMessage = document.getElementById('cookieSyncMessage');
-
     // --- Configuration ---
     // Replace 'YOUR_NETWORK_ID' with your actual Google Ad Manager or advertiser network ID
     // Example: '168-628-5891' or your network ID
@@ -306,29 +295,9 @@ function w3_close() {
     // Build the Google cookie-matching pixel URL
     const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
 
-    // Update status message on page
-    function updateStatus(message, type = 'info') {
-        if (statusMessage) {
-            statusMessage.innerHTML = message;
-        }
-        if (statusDiv) {
-            statusDiv.className = `w3-container w3-padding-16`;
-            if (type === 'success') {
-                statusDiv.className += ' w3-green';
-            } else if (type === 'error') {
-                statusDiv.className += ' w3-red';
-            } else if (type === 'warning') {
-                statusDiv.className += ' w3-yellow';
-            } else {
-                statusDiv.className += ' w3-light-grey';
-            }
-        }
-    }
-
     // Perform client-side cookie sync
     function performCookieSync() {
         console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
-        updateStatus(' Loading Google tracking pixel...', 'info');
 
         // Create a new Image object - this is the standard way to fire a tracking pixel
         const pixel = new Image();
@@ -336,13 +305,11 @@ function w3_close() {
         // This function runs if the pixel loads successfully
         pixel.onload = function() {
             console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
-            updateStatus(' <strong>SUCCESS:</strong> Tracking pixel loaded! Cookie sync completed.<br><small>Check Network and Application tabs in DevTools to verify cookies were set.</small>', 'success');
         };
 
         // This function runs if there's an error (e.g., blocked by an ad blocker)
         pixel.onerror = function() {
             console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
-            updateStatus(' <strong>ERROR:</strong> Pixel request blocked.<br><small>Disable ad blockers and privacy extensions, then refresh the page.</small>', 'error');
         };
 
         // Setting the 'src' of the image is what actually makes the browser send the request
@@ -353,7 +320,7 @@ function w3_close() {
         // Optional: Set a timeout to detect if pixel is taking too long
         setTimeout(function() {
             if (!pixel.complete) {
-                console.warn('[Cookie Sync]  Pixel load is taking longer than expected...');
+                console.warn('[Cookie Sync] Pixel load is taking longer than expected...');
             }
         }, 10000);
     }
