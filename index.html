@@ -343,9 +343,11 @@ function w3_close() {
     // Perform cookie sync
     function performCookieSync() {
         if (!hasConsent()) {
+            console.warn('%c[Cookie Sync] SKIPPED: No consent. Run window.diagnoseCookieSync() to check.', 'color: orange;');
             return;
         }
 
+        console.log('%c[Cookie Sync] Loading pixel...', 'color: blue;');
         const pixel = new Image();
 
         pixel.onload = function() {
@@ -438,6 +440,8 @@ function w3_close() {
         const consentTrack = getCookie('consentTrack');
         const optanonConsent = getCookie('OptanonConsent');
         const hasConsentResult = hasConsent();
+        
+       
         
         return {
             hasConsent: hasConsentResult,
