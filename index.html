@@ -419,6 +419,19 @@ function w3_close() {
         };
         pixel.src = googlePixelUrl;
     };
+
+    // Diagnostic function to check why IDE cookie might not appear
+    window.diagnoseCookieSync = function() {
+        const consentTrack = getCookie('consentTrack');
+        const optanonConsent = getCookie('OptanonConsent');
+        const hasConsentResult = hasConsent();
+        
+        return {
+            hasConsent: hasConsentResult,
+            consentTrack: consentTrack,
+            optanonConsent: optanonConsent ? 'exists' : 'missing'
+        };
+    };
 })();
 </script>
  
