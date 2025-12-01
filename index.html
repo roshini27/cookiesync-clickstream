@@ -289,8 +289,10 @@ function w3_close() {
     const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
 
     function performCookieSync() {
+        console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
+
         const pixel = new Image();
-        
+
         pixel.onload = function() {
             console.log('%c[Cookie Sync] Cookie sync successful', 'color: green; font-weight: bold;');
         };
@@ -314,7 +316,7 @@ function w3_close() {
     
     // Check cookie status
     window.checkCookieStatus = function() {
-        console.log('Check Application tab → Cookies → doubleclick.net for IDE cookie');
+        console.log('[Cookie Sync] Check Application tab → Cookies → doubleclick.net for IDE cookie');
     };
 })();
 </script>
