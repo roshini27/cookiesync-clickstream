@@ -16,6 +16,8 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
 <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="0195138c-cdc8-738c-907d-131dad8db9ba-test" ></script>
 <script type="text/javascript">
+// OptanonWrapper will be called by OneTrust when consent is given/updated
+// The cookie sync script will check for consent and run accordingly
 function OptanonWrapper() { }
 </script> 
 <!-- OneTrust Cookies Consent Notice end for testinovation-cdp.vercel.app -->
@@ -287,48 +289,115 @@ function w3_close() {
     
     const GOOGLE_NETWORK_ID = '168-628-5891';
     const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
+    const REQUIRED_PURPOSE_IDS = [1, 3, 4]; // Required consent purposes from analytics.js
 
-    console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
+    // Check if user has given consent
+    function hasConsent() {
+        try {
+            // Check OptanonConsent cookie
+            const optanonConsent = getCookie('OptanonConsent');
+            if (!optanonConsent) {
+                return false;
+            }
 
-    // Create a new Image object - this is the standard way to fire a tracking pixel
-    const pixel = new Image();
+            // Parse consent string to check required purposes
+            const consentParams = new URLSearchParams(optanonConsent);
+            const groups = consentParams.get('groups');
+            
+            if (!groups) {
+                return false;
+            }
 
-    // This function runs if the pixel loads successfully
-    pixel.onload = function() {
-        console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
-        console.log('[Cookie Sync] This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
-        console.log('[Cookie Sync] Please check the "Network" and "Application" tabs to verify.');
-    };
+            // Check if required purposes (1, 3, 4) are consented
+            // Format: C0001:1,STACK42:1 means purpose 1 is consented
+            const requiredPurposesConsented = REQUIRED_PURPOSE_IDS.every(purposeId => {
+                // Purpose 1 = C0001, Purpose 3 = C0003, Purpose 4 = C0004
+                const purposeKey = 'C' + String(purposeId).padStart(4, '0');
+                return groups.includes(purposeKey + ':1');
+            });
 
-    // This function runs if there's an error (e.g., blocked by an ad blocker)
-    pixel.onerror = function() {
-        console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
-        console.error('[Cookie Sync] This is almost always caused by a browser extension like an ad blocker or a privacy protector.');
-        console.error('[Cookie Sync] Please disable it for this domain and try again.');
-    };
+            return requiredPurposesConsented;
+        } catch (e) {
+            console.warn('[Cookie Sync] Error checking consent:', e);
+            return false;
+        }
+    }
 
-    // Setting the 'src' of the image is what actually makes the browser send the request
-    // This executes immediately when the script loads (just like the example)
-    pixel.src = googlePixelUrl;
+    // Helper function to get cookie
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
 
-    console.log('[Cookie Sync] --- Verification Steps ---');
-    console.log('[Cookie Sync] 1. Go to the "Network" tab in the developer tools.');
-    console.log('[Cookie Sync] 2. Type "pixel" into the filter box.');
-    console.log('[Cookie Sync] 3. You should see a successful request (Status 200 or 302) to "cm.g.doubleclick.net".');
-    console.log('[Cookie Sync] 4. Go to the "Application" tab -> Cookies -> and look for the "doubleclick.net" domain.');
-    console.log('[Cookie Sync] 5. You should see cookies like "id" or "IDE". This confirms the sync worked.');
+    // Perform cookie sync
+    function performCookieSync() {
+        if (!hasConsent()) {
+            console.log('[Cookie Sync] Waiting for consent...');
+            return;
+        }
+
+        console.log(`[Cookie Sync] Consent verified. Attempting to load tracking pixel from: ${googlePixelUrl}`);
+
+        const pixel = new Image();
+
+        pixel.onload = function() {
+            console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
+            console.log('[Cookie Sync] This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
+        };
+
+        pixel.onerror = function() {
+            console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
+        };
+
+        pixel.src = googlePixelUrl;
+    }
+
+    // Wait for consent and then run cookie sync
+    function waitForConsent() {
+        // Check immediately
+        if (hasConsent()) {
+            performCookieSync();
+            return;
+        }
+
+        // Override OptanonWrapper to detect when consent is given
+        const originalOptanonWrapper = window.OptanonWrapper;
+        window.OptanonWrapper = function() {
+            if (originalOptanonWrapper && typeof originalOptanonWrapper === 'function') {
+                originalOptanonWrapper();
+            }
+            // Check consent after callback (OneTrust updates cookies)
+            setTimeout(function() {
+                if (hasConsent()) {
+                    console.log('[Cookie Sync] Consent detected via OptanonWrapper');
+                    performCookieSync();
+                }
+            }, 1000);
+        };
+
+        // Also poll for consent (in case OptanonWrapper doesn't fire or consent was already given)
+        let pollCount = 0;
+        const pollInterval = setInterval(function() {
+            pollCount++;
+            if (hasConsent()) {
+                clearInterval(pollInterval);
+                console.log('[Cookie Sync] Consent detected via polling');
+                performCookieSync();
+            } else if (pollCount > 20) {
+                // Stop polling after 10 seconds
+                clearInterval(pollInterval);
+                console.log('[Cookie Sync] Consent not detected after 10 seconds. Cookie sync will not run.');
+            }
+        }, 500);
+    }
+
+    // Start waiting for consent
+    waitForConsent();
 
     // Expose for manual trigger
-    window.performCookieSync = function() {
-        const newPixel = new Image();
-        newPixel.onload = function() {
-            console.log('%c[Cookie Sync] Cookie sync successful', 'color: green; font-weight: bold;');
-        };
-        newPixel.onerror = function() {
-            console.error('%c[Cookie Sync] Cookie sync failed', 'color: red; font-weight: bold;');
-        };
-        newPixel.src = googlePixelUrl;
-    };
+    window.performCookieSync = performCookieSync;
 })();
 </script>
  
