@@ -288,7 +288,7 @@ function w3_close() {
     'use strict';
     
     const GOOGLE_NETWORK_ID = '168-628-5891';
-    const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm=1`;
+    const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
     const REQUIRED_PURPOSE_IDS = ['1', '3', '4']; // Required consent purposes from analytics.js
 
     // Helper function to get cookie
@@ -343,23 +343,19 @@ function w3_close() {
     // Perform cookie sync
     function performCookieSync() {
         if (!hasConsent()) {
-            console.warn('%c[Cookie Sync] SKIPPED: No consent. Run window.diagnoseCookieSync() to check.', 'color: orange;');
             return;
         }
 
-        console.log('%c[Cookie Sync] Loading pixel...', 'color: blue;');
         const pixel = new Image();
 
         pixel.onload = function() {
             console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel loaded successfully.', 'color: green; font-weight: bold;');
-            console.log('%c[Cookie Sync] Cookie synchronization completed successfully!', 'color: green; font-weight: bold;');
         };
 
         pixel.onerror = function() {
-            console.error('%c[Cookie Sync] ERROR: The pixel request was blocked or failed.', 'color: red; font-weight: bold;');
+            console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
         };
 
-        // Set the source to trigger the request
         pixel.src = googlePixelUrl;
     }
 
@@ -409,16 +405,6 @@ function w3_close() {
         }
     }, 2000);
 
-    // Run cookie sync on every page load if consent exists (not just on initial consent)
-    // This ensures IDE cookie is refreshed/maintained
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            if (hasConsent()) {
-                performCookieSync();
-            }
-        }, 1000);
-    });
-
     // Expose for manual trigger (checks consent first)
     window.performCookieSync = performCookieSync;
 
@@ -427,7 +413,6 @@ function w3_close() {
         const pixel = new Image();
         pixel.onload = function() {
             console.log('%c[Cookie Sync] SUCCESS: Pixel loaded (test mode)', 'color: green; font-weight: bold;');
-            console.log('%c[Cookie Sync] Cookie synchronization completed successfully!', 'color: green; font-weight: bold;');
         };
         pixel.onerror = function() {
             console.error('%c[Cookie Sync] ERROR: Pixel blocked (test mode)', 'color: red; font-weight: bold;');
@@ -441,13 +426,10 @@ function w3_close() {
         const optanonConsent = getCookie('OptanonConsent');
         const hasConsentResult = hasConsent();
         
-       
-        
         return {
             hasConsent: hasConsentResult,
             consentTrack: consentTrack,
-            optanonConsent: optanonConsent ? 'exists' : 'missing',
-            pixelUrl: googlePixelUrl
+            optanonConsent: optanonConsent ? 'exists' : 'missing'
         };
     };
 })();
