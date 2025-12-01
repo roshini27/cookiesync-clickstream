@@ -285,58 +285,37 @@ function w3_close() {
 (function() {
     'use strict';
     
-    const currentDomain = window.location.hostname;
-    console.log(`[Cookie Sync] Initializing on ${currentDomain}`);
-
-    // --- Configuration ---
-    // Replace 'YOUR_NETWORK_ID' with your actual Google Ad Manager or advertiser network ID
-    // Example: '168-628-5891' or your network ID
-    const GOOGLE_NETWORK_ID = '168-628-5891'; // Change this to your network ID
-    
-    // Build the Google cookie-matching pixel URL
+    const GOOGLE_NETWORK_ID = '168-628-5891';
     const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
 
-    // Perform client-side cookie sync
     function performCookieSync() {
-        console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
-
-        // Create a new Image object - this is the standard way to fire a tracking pixel
         const pixel = new Image();
-
-        // This function runs if the pixel loads successfully
+        
         pixel.onload = function() {
-            console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
+            console.log('%c[Cookie Sync] Cookie sync successful', 'color: green; font-weight: bold;');
         };
 
-        // This function runs if there's an error (e.g., blocked by an ad blocker)
         pixel.onerror = function() {
-            console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
+            console.error('%c[Cookie Sync] Cookie sync failed', 'color: red; font-weight: bold;');
         };
 
-        // Setting the 'src' of the image is what actually makes the browser send the request
-        // This is the critical part - the browser makes a client-side request to Google
-        // Google's server responds and sets cookies on the doubleclick.net domain
         pixel.src = googlePixelUrl;
-
-        // Optional: Set a timeout to detect if pixel is taking too long
-        setTimeout(function() {
-            if (!pixel.complete) {
-                console.warn('[Cookie Sync] Pixel load is taking longer than expected...');
-            }
-        }, 10000);
     }
 
-    // Auto-start cookie sync when page loads
-    // This ensures cookie sync happens automatically
+    // Auto-start on page load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', performCookieSync);
     } else {
-        // DOM already loaded, run immediately
         performCookieSync();
     }
 
-    // Expose function globally for manual triggering if needed
+    // Expose for manual trigger
     window.performCookieSync = performCookieSync;
+    
+    // Check cookie status
+    window.checkCookieStatus = function() {
+        console.log('Check Application tab → Cookies → doubleclick.net for IDE cookie');
+    };
 })();
 </script>
  
