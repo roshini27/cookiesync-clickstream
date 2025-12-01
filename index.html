@@ -291,10 +291,12 @@ function w3_close() {
     const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
 
     function performCookieSync() {
+        console.log('[Cookie Sync] Starting cookie sync...');
+        
         const pixel = new Image();
         
         pixel.onload = function() {
-            console.log('%c[Cookie Sync]  Cookie sync successful');
+            console.log('%c[Cookie Sync]  Cookie sync successful - cookies loaded');
         };
 
         pixel.onerror = function() {
@@ -302,6 +304,7 @@ function w3_close() {
         };
 
         pixel.src = googlePixelUrl;
+        console.log('[Cookie Sync] Request sent to:', googlePixelUrl);
     }
 
     // Auto-start on page load
@@ -313,14 +316,8 @@ function w3_close() {
 
     // Expose for manual trigger
     window.performCookieSync = performCookieSync;
-    
-    // Check cookie status
-    window.checkCookieStatus = function() {
-        console.log('Check Application tab → Cookies → doubleclick.net for IDE cookie');
-    };
 })();
 </script>
  
 </body>
 </html>
-
