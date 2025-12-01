@@ -350,6 +350,7 @@ function w3_close() {
 
         pixel.onload = function() {
             console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel loaded successfully.', 'color: green; font-weight: bold;');
+            console.log('%c[Cookie Sync] Cookie synchronization completed successfully!', 'color: green; font-weight: bold;');
         };
 
         pixel.onerror = function() {
@@ -424,6 +425,7 @@ function w3_close() {
         const pixel = new Image();
         pixel.onload = function() {
             console.log('%c[Cookie Sync] SUCCESS: Pixel loaded (test mode)', 'color: green; font-weight: bold;');
+            console.log('%c[Cookie Sync] Cookie synchronization completed successfully!', 'color: green; font-weight: bold;');
         };
         pixel.onerror = function() {
             console.error('%c[Cookie Sync] ERROR: Pixel blocked (test mode)', 'color: red; font-weight: bold;');
