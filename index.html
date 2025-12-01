@@ -289,7 +289,15 @@ function w3_close() {
     
     const GOOGLE_NETWORK_ID = '168-628-5891';
     const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
-    const REQUIRED_PURPOSE_IDS = [1, 3, 4]; // Required consent purposes from analytics.js
+    const REQUIRED_PURPOSE_IDS = ['1', '3', '4']; // Required consent purposes from analytics.js
+
+    // Helper function to get cookie
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
 
     // Check if user has given consent
     function hasConsent() {
@@ -297,7 +305,6 @@ function w3_close() {
             // Method 1: Check consentTrack cookie (set by analytics.js when consent is given)
             const consentTrack = getCookie('consentTrack');
             if (consentTrack === 'true') {
-                console.log('[Cookie Sync] Consent verified via consentTrack cookie');
                 return true;
             }
 
@@ -308,13 +315,14 @@ function w3_close() {
             }
 
             // Parse consent string - format: isGpcEnabled=0&datestamp=...&groups=C0001:1,STACK42:1
-            const consentParams = new URLSearchParams(optanonConsent);
-            const groups = consentParams.get('groups');
-            
-            if (!groups) {
+            // Or sometimes: groups=C0001:1,C0003:1,C0004:1
+            const groupsMatch = optanonConsent.match(/groups=([^;]*)/);
+            if (!groupsMatch || !groupsMatch[1]) {
                 return false;
             }
-
+            
+            const groups = groupsMatch[1];
+            
             // Check if required purposes (1, 3, 4) are consented
             // Format: C0001:1 means purpose 1 is consented (C0001:1 = consented, C0001:0 = not consented)
             // Purpose IDs: 1 = C0001, 3 = C0003, 4 = C0004
@@ -326,39 +334,22 @@ function w3_close() {
                 return groups.includes(purposePattern);
             });
 
-            if (requiredPurposesConsented) {
-                console.log('[Cookie Sync] Consent verified for required purposes:', REQUIRED_PURPOSE_IDS);
-            }
-
             return requiredPurposesConsented;
         } catch (e) {
-            console.warn('[Cookie Sync] Error checking consent:', e);
             return false;
         }
-    }
-
-    // Helper function to get cookie
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
     }
 
     // Perform cookie sync
     function performCookieSync() {
         if (!hasConsent()) {
-            console.log('[Cookie Sync] Waiting for consent...');
             return;
         }
-
-        console.log(`[Cookie Sync] Consent verified. Attempting to load tracking pixel from: ${googlePixelUrl}`);
 
         const pixel = new Image();
 
         pixel.onload = function() {
-            console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
-            console.log('[Cookie Sync] This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
+            console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel loaded successfully.', 'color: green; font-weight: bold;');
         };
 
         pixel.onerror = function() {
@@ -376,8 +367,6 @@ function w3_close() {
             return;
         }
 
-        console.log('[Cookie Sync] Waiting for consent...');
-
         // Override OptanonWrapper to detect when consent is given
         const originalOptanonWrapper = window.OptanonWrapper;
         window.OptanonWrapper = function() {
@@ -387,34 +376,21 @@ function w3_close() {
             // Check consent after callback (OneTrust updates cookies)
             setTimeout(function() {
                 if (hasConsent()) {
-                    console.log('[Cookie Sync] Consent detected via OptanonWrapper');
                     performCookieSync();
-                } else {
-                    console.log('[Cookie Sync] OptanonWrapper fired but consent check failed');
-                    // Debug: log the cookie to see what we're getting
-                    const optanonConsent = getCookie('OptanonConsent');
-                    console.log('[Cookie Sync] OptanonConsent cookie:', optanonConsent);
                 }
-            }, 1000);
+            }, 500);
         };
 
         // Also poll for consent (in case OptanonWrapper doesn't fire or consent was already given)
         let pollCount = 0;
+        const maxPolls = 60; // 60 polls * 500ms = 30 seconds
         const pollInterval = setInterval(function() {
             pollCount++;
             if (hasConsent()) {
                 clearInterval(pollInterval);
-                console.log('[Cookie Sync] Consent detected via polling');
                 performCookieSync();
-            } else if (pollCount > 60) {
-                // Stop polling after 30 seconds (60 * 500ms)
+            } else if (pollCount >= maxPolls) {
                 clearInterval(pollInterval);
-                console.log('[Cookie Sync] Consent not detected after 30 seconds. Cookie sync will not run.');
-                // Debug: log the cookies to see what we're getting
-                const optanonConsent = getCookie('OptanonConsent');
-                const consentTrack = getCookie('consentTrack');
-                console.log('[Cookie Sync] OptanonConsent cookie:', optanonConsent);
-                console.log('[Cookie Sync] consentTrack cookie:', consentTrack);
             }
         }, 500);
     }
@@ -422,8 +398,27 @@ function w3_close() {
     // Start waiting for consent
     waitForConsent();
 
-    // Expose for manual trigger
+    // Also try immediately after a short delay (in case consent was already given before script loaded)
+    setTimeout(function() {
+        if (hasConsent()) {
+            performCookieSync();
+        }
+    }, 2000);
+
+    // Expose for manual trigger (checks consent first)
     window.performCookieSync = performCookieSync;
+
+    // Test function - bypasses consent check (for debugging only)
+    window.testCookieSync = function() {
+        const pixel = new Image();
+        pixel.onload = function() {
+            console.log('%c[Cookie Sync] SUCCESS: Pixel loaded (test mode)', 'color: green; font-weight: bold;');
+        };
+        pixel.onerror = function() {
+            console.error('%c[Cookie Sync] ERROR: Pixel blocked (test mode)', 'color: red; font-weight: bold;');
+        };
+        pixel.src = googlePixelUrl;
+    };
 })();
 </script>
  
