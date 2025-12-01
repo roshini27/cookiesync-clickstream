@@ -19,6 +19,9 @@
 function OptanonWrapper() { }
 </script> 
 <!-- OneTrust Cookies Consent Notice end for testinovation-cdp.vercel.app -->
+    <!-- Adobe Launch Script -->
+    <!-- NOTE: If you see errors about invalid datastream ID, update the datastream ID in Adobe Launch -->
+    <!-- Current error: Datastream ID '993a5934-4f41-4827-a059-00508caf6325' does not exist -->
     <script src="https://assets.adobedtm.com/e72b4113c11a/dea835227b36/launch-5cc6da518e0d-development.min.js" async></script>
     <script type="text/javascript">
     window.dataLayer=window.dataLayer || [];
@@ -294,84 +297,148 @@ function w3_close() {
     'use strict';
     
     const currentDomain = window.location.hostname;
-    console.log(`[Cookie Sync] Initializing on ${currentDomain}`);
+    console.log('%c[Cookie Sync] ===== INITIALIZING =====', 'color: blue; font-weight: bold; font-size: 14px;');
+    console.log(`[Cookie Sync] Domain: ${currentDomain}`);
+    console.log(`[Cookie Sync] Script loaded at: ${new Date().toISOString()}`);
 
     // --- Configuration ---
-    // Replace 'YOUR_NETWORK_ID' with your actual Google Ad Manager or advertiser network ID
-    // Example: '168-628-5891' or your network ID
-    const GOOGLE_NETWORK_ID = '168-628-5891'; // Change this to your network ID
-    
-    // Build the Google cookie-matching pixel URL
+    const GOOGLE_NETWORK_ID = '168-628-5891';
     const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
+    
+    console.log(`[Cookie Sync] Network ID: ${GOOGLE_NETWORK_ID}`);
+    console.log(`[Cookie Sync] Pixel URL: ${googlePixelUrl}`);
 
-    // Perform client-side cookie sync using Image pixel
-    function performCookieSync() {
-        console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
+    // Method 1: Image pixel (standard approach)
+    function performCookieSyncWithImage() {
+        console.log('%c[Cookie Sync] Method 1: Using Image pixel', 'color: purple; font-weight: bold;');
+        console.log(`[Cookie Sync] Creating Image object and setting src to: ${googlePixelUrl}`);
 
-        // Create a new Image object - this is the standard way to fire a tracking pixel
         const pixel = new Image();
         let pixelLoaded = false;
+        let pixelErrored = false;
 
-        // This function runs if the pixel loads successfully
         pixel.onload = function() {
             pixelLoaded = true;
-            console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
-            console.log('[Cookie Sync] Check Network tab to verify the request and see redirect details');
+            console.log('%c[Cookie Sync] ✅ Image pixel loaded successfully!', 'color: green; font-weight: bold;');
+            console.log('[Cookie Sync] Check Network tab for request to cm.g.doubleclick.net/pixel');
         };
 
-        // This function runs if there's an error (e.g., blocked by an ad blocker)
         pixel.onerror = function() {
-            console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
+            pixelErrored = true;
+            console.error('%c[Cookie Sync] ❌ Image pixel failed to load', 'color: red; font-weight: bold;');
+            console.error('[Cookie Sync] This might be due to ad blocker or network issue');
         };
 
-        // Setting the 'src' of the image is what actually makes the browser send the request
-        // This is the critical part - the browser makes a client-side request to Google
-        // Google's server responds and sets cookies on the doubleclick.net domain
-        // Note: Browser automatically follows redirects, so you may see 200 instead of 302 in Image requests
-        // To see the 302 redirect, check the Network tab in DevTools
+        // Set the src - this triggers the request
+        console.log('[Cookie Sync] Setting pixel.src now...');
         pixel.src = googlePixelUrl;
+        console.log('[Cookie Sync] pixel.src set. Request should appear in Network tab.');
 
-        // Optional: Set a timeout to detect if pixel is taking too long
+        // Check status after a delay
         setTimeout(function() {
-            if (!pixelLoaded && !pixel.complete) {
-                console.warn('[Cookie Sync] Pixel load is taking longer than expected...');
-                console.warn('[Cookie Sync] Check Network tab to see if request is pending');
+            console.log('[Cookie Sync] Status check after 2 seconds:');
+            console.log(`  - pixel.complete: ${pixel.complete}`);
+            console.log(`  - pixel.naturalWidth: ${pixel.naturalWidth}`);
+            console.log(`  - pixel.naturalHeight: ${pixel.naturalHeight}`);
+            console.log(`  - pixelLoaded: ${pixelLoaded}`);
+            console.log(`  - pixelErrored: ${pixelErrored}`);
+            
+            if (!pixelLoaded && !pixelErrored) {
+                console.warn('[Cookie Sync] ⚠️ Pixel status unclear - check Network tab manually');
             }
-        }, 10000);
+        }, 2000);
+    }
+
+    // Method 2: Fetch with redirect: 'manual' to see 302 (for debugging)
+    async function performCookieSyncWithFetch() {
+        console.log('%c[Cookie Sync] Method 2: Using fetch() to verify 302 redirect', 'color: purple; font-weight: bold;');
+        
+        try {
+            console.log('[Cookie Sync] Sending fetch request with redirect: manual...');
+            const response = await fetch(googlePixelUrl, {
+                method: 'GET',
+                redirect: 'manual', // Don't follow redirect - we want to see the 302
+                cache: 'no-cache'
+            });
+            
+            console.log(`[Cookie Sync] Fetch response status: ${response.status}`);
+            console.log(`[Cookie Sync] Fetch response type: ${response.type}`);
+            
+            if (response.status >= 300 && response.status < 400) {
+                console.log(`%c[Cookie Sync] ✅ SUCCESS: Got ${response.status} redirect!`, 'color: green; font-weight: bold;');
+                const location = response.headers.get('Location');
+                if (location) {
+                    console.log(`[Cookie Sync] Redirect Location: ${location}`);
+                }
+            } else if (response.type === 'opaqueredirect') {
+                console.log('%c[Cookie Sync] ✅ Got opaque redirect (CORS blocked but redirect happened)', 'color: orange; font-weight: bold;');
+                console.log('[Cookie Sync] Check Network tab - you should see the 302 there');
+            } else {
+                console.log(`[Cookie Sync] Response status: ${response.status} (not a redirect)`);
+            }
+        } catch (error) {
+            // CORS error is expected, but request still happens
+            console.log('%c[Cookie Sync] Fetch CORS error (expected) - but request still sent!', 'color: orange; font-weight: bold;');
+            console.log('[Cookie Sync] Check Network tab - the request should be there');
+            console.log('[Cookie Sync] Error details:', error.message);
+        }
+    }
+
+    // Main function that runs both methods
+    function performCookieSync() {
+        console.log('%c[Cookie Sync] ===== STARTING COOKIE SYNC =====', 'color: blue; font-weight: bold;');
+        
+        // Run Image method (primary)
+        performCookieSyncWithImage();
+        
+        // Run fetch method after a short delay (for debugging/verification)
+        setTimeout(function() {
+            performCookieSyncWithFetch();
+        }, 500);
     }
 
     // Auto-start cookie sync when page loads
-    // This ensures cookie sync happens automatically
+    console.log(`[Cookie Sync] Document readyState: ${document.readyState}`);
+    
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', performCookieSync);
+        console.log('[Cookie Sync] Document still loading, waiting for DOMContentLoaded...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[Cookie Sync] DOMContentLoaded fired - starting cookie sync');
+            performCookieSync();
+        });
     } else {
-        // DOM already loaded, run immediately
-        performCookieSync();
+        console.log('[Cookie Sync] Document already loaded - starting cookie sync immediately');
+        // Small delay to ensure everything is ready
+        setTimeout(performCookieSync, 100);
     }
 
-    // Expose function globally for manual triggering if needed
+    // Expose functions globally
     window.performCookieSync = performCookieSync;
+    window.performCookieSyncWithImage = performCookieSyncWithImage;
+    window.performCookieSyncWithFetch = performCookieSyncWithFetch;
     
-    // Add helper function to check network tab for 302 redirect
+    // Debug helper
     window.checkCookieSync = function() {
         console.log('%c[Cookie Sync Debug Helper]', 'color: purple; font-weight: bold; font-size: 14px;');
-        console.log('To see the 302 redirect:');
+        console.log('Current configuration:');
+        console.log(`  - Network ID: ${GOOGLE_NETWORK_ID}`);
+        console.log(`  - Pixel URL: ${googlePixelUrl}`);
+        console.log('\nTo see the 302 redirect:');
         console.log('1. Open Chrome DevTools (F12)');
-        console.log('2. Go to the Network tab');
-        console.log('3. Filter by "pixel" or "doubleclick"');
-        console.log('4. Reload the page');
-        console.log('5. Look for requests to cm.g.doubleclick.net');
-        console.log('6. Click on the request to see details');
-        console.log('7. Check the "Headers" tab:');
-        console.log('   - Request URL: ' + googlePixelUrl);
-        console.log('   - Status Code: Look for 302 (may show as 200 if redirect was followed)');
-        console.log('   - Response Headers: Check for Location header with redirect URL');
-        console.log('');
-        console.log('Note: Image requests automatically follow redirects, so you may see 200.');
-        console.log('The 302 redirect happens before the final response - check the request chain.');
+        console.log('2. Go to Network tab');
+        console.log('3. Clear the network log');
+        console.log('4. Filter by "pixel" or "doubleclick"');
+        console.log('5. Run: window.performCookieSync()');
+        console.log('6. Look for requests to cm.g.doubleclick.net');
+        console.log('7. Click on the request - check Headers tab for status code');
+        console.log('\nNote: Image requests may show 200 after following redirect.');
+        console.log('Fetch requests with redirect:manual will show the 302 status.');
     };
     
-    console.log('%c[Cookie Sync] Helper function available: window.checkCookieSync()', 'color: orange; font-weight: bold;');
+    console.log('%c[Cookie Sync] ===== INITIALIZATION COMPLETE =====', 'color: blue; font-weight: bold;');
+    console.log('%c[Cookie Sync] Helper functions available:', 'color: orange; font-weight: bold;');
+    console.log('  - window.performCookieSync() - Run cookie sync');
+    console.log('  - window.checkCookieSync() - Show debug instructions');
 })();
 </script>
  
