@@ -313,6 +313,11 @@ function w3_close() {
 
     // Expose for manual trigger
     window.performCookieSync = performCookieSync;
+    
+    // Check cookie status
+    window.checkCookieStatus = function() {
+        console.log('Check Application tab → Cookies → doubleclick.net for IDE cookie');
+    };
 })();
 </script>
  
