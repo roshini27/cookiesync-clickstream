@@ -288,35 +288,46 @@ function w3_close() {
     const GOOGLE_NETWORK_ID = '168-628-5891';
     const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
 
-    function performCookieSync() {
-        console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
+    console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
 
-        const pixel = new Image();
+    // Create a new Image object - this is the standard way to fire a tracking pixel
+    const pixel = new Image();
 
-        pixel.onload = function() {
-            console.log('%c[Cookie Sync] Cookie sync successful', 'color: green; font-weight: bold;');
-        };
+    // This function runs if the pixel loads successfully
+    pixel.onload = function() {
+        console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
+        console.log('[Cookie Sync] This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
+        console.log('[Cookie Sync] Please check the "Network" and "Application" tabs to verify.');
+    };
 
-        pixel.onerror = function() {
-            console.error('%c[Cookie Sync] Cookie sync failed', 'color: red; font-weight: bold;');
-        };
+    // This function runs if there's an error (e.g., blocked by an ad blocker)
+    pixel.onerror = function() {
+        console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
+        console.error('[Cookie Sync] This is almost always caused by a browser extension like an ad blocker or a privacy protector.');
+        console.error('[Cookie Sync] Please disable it for this domain and try again.');
+    };
 
-        pixel.src = googlePixelUrl;
-    }
+    // Setting the 'src' of the image is what actually makes the browser send the request
+    // This executes immediately when the script loads (just like the example)
+    pixel.src = googlePixelUrl;
 
-    // Auto-start on page load
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', performCookieSync);
-    } else {
-        performCookieSync();
-    }
+    console.log('[Cookie Sync] --- Verification Steps ---');
+    console.log('[Cookie Sync] 1. Go to the "Network" tab in the developer tools.');
+    console.log('[Cookie Sync] 2. Type "pixel" into the filter box.');
+    console.log('[Cookie Sync] 3. You should see a successful request (Status 200 or 302) to "cm.g.doubleclick.net".');
+    console.log('[Cookie Sync] 4. Go to the "Application" tab -> Cookies -> and look for the "doubleclick.net" domain.');
+    console.log('[Cookie Sync] 5. You should see cookies like "id" or "IDE". This confirms the sync worked.');
 
     // Expose for manual trigger
-    window.performCookieSync = performCookieSync;
-    
-    // Check cookie status
-    window.checkCookieStatus = function() {
-        console.log('[Cookie Sync] Check Application tab → Cookies → doubleclick.net for IDE cookie');
+    window.performCookieSync = function() {
+        const newPixel = new Image();
+        newPixel.onload = function() {
+            console.log('%c[Cookie Sync] Cookie sync successful', 'color: green; font-weight: bold;');
+        };
+        newPixel.onerror = function() {
+            console.error('%c[Cookie Sync] Cookie sync failed', 'color: red; font-weight: bold;');
+        };
+        newPixel.src = googlePixelUrl;
     };
 })();
 </script>
