@@ -358,19 +358,32 @@ function w3_close() {
         
         // Provide instructions for seeing 302 in Network tab
         setTimeout(function() {
-            console.log('%c[Cookie Sync] 📋 How to see the 302 redirect in Network tab:', 'color: purple; font-weight: bold;');
-            console.log('1. Go to Network tab in DevTools');
-            console.log('2. Filter by "pixel" or search for "doubleclick"');
-            console.log('3. Look for request: cm.g.doubleclick.net/pixel');
-            console.log('4. Click on the request');
-            console.log('5. Check the "Headers" tab:');
-            console.log('   - Look at "General" section for Status Code');
-            console.log('   - Check "Response Headers" for "Location" header');
-            console.log('   - The redirect chain may show 302 → 200');
+            console.log('%c[Cookie Sync] 📋 How to verify the 302 redirect:', 'color: purple; font-weight: bold;');
             console.log('');
-            console.log('⚠️  Note: Image requests automatically follow redirects.');
-            console.log('   You may see status 200 (after redirect) instead of 302.');
-            console.log('   The 302 redirect still happens - check the request details!');
+            console.log('Method 1: Check Network Tab Headers');
+            console.log('1. Go to Network tab → Filter by "pixel"');
+            console.log('2. Click on: cm.g.doubleclick.net/pixel');
+            console.log('3. Check "Headers" tab → "General" section');
+            console.log('   - Status Code may show 200 (after redirect)');
+            console.log('   - This means: 302 happened → browser followed → 200 final');
+            console.log('');
+            console.log('Method 2: Check Timing Tab (Shows Redirect Time)');
+            console.log('1. Click on the pixel request');
+            console.log('2. Go to "Timing" tab');
+            console.log('3. Look for "Redirect" time (if > 0ms, redirect happened)');
+            console.log('4. This confirms the 302 redirect occurred');
+            console.log('');
+            console.log('Method 3: Verify Cookies Were Set');
+            console.log('1. Go to Application tab → Cookies');
+            console.log('2. Look for: https://doubleclick.net');
+            console.log('3. Check for IDE or id cookies');
+            console.log('4. If cookies exist → Redirect was successful!');
+            console.log('');
+            console.log('⚠️  Important: Image requests auto-follow redirects.');
+            console.log('   Chrome shows 200 (final status) not 302 (initial redirect).');
+            console.log('   The 302 DOES happen server-side - it\'s just followed automatically.');
+            console.log('');
+            console.log('💡 Run window.verifyRedirect() for detailed explanation');
         }, 2000);
     }
 
@@ -389,6 +402,45 @@ function w3_close() {
         setTimeout(performCookieSync, 100);
     }
 
+    // Verification function to check if redirect happened
+    window.verifyRedirect = function() {
+        console.log('%c[Cookie Sync] ===== VERIFYING REDIRECT =====', 'color: blue; font-weight: bold;');
+        console.log('\n📊 Understanding the 302 Redirect:');
+        console.log('The Google pixel endpoint (cm.g.doubleclick.net/pixel) responds with 302 redirect.');
+        console.log('Image requests automatically follow redirects, so Chrome shows the final status (200).');
+        console.log('The 302 IS happening server-side, but Chrome follows it automatically.\n');
+        
+        console.log('✅ Verification Methods:');
+        console.log('1. Check Network Tab:');
+        console.log('   - Request to cm.g.doubleclick.net/pixel should exist');
+        console.log('   - Status may show 200 (after redirect)');
+        console.log('   - This confirms the request was made and redirect was followed');
+        
+        console.log('\n2. Check Cookies (Application Tab):');
+        console.log('   - Go to Application → Cookies → https://doubleclick.net');
+        console.log('   - Look for IDE or id cookies');
+        console.log('   - If cookies exist → Redirect happened and cookies were set!');
+        
+        console.log('\n3. Check Request Details:');
+        console.log('   - In Network tab, click on the pixel request');
+        console.log('   - Check "Timing" tab - shows redirect time if redirect occurred');
+        console.log('   - Check "Response" tab - may show redirect information');
+        
+        console.log('\n💡 Important:');
+        console.log('   - The 302 redirect DOES happen (server-side)');
+        console.log('   - Chrome automatically follows it, so you see 200');
+        console.log('   - This is normal behavior for Image requests');
+        console.log('   - The redirect is successful if:');
+        console.log('     ✓ Request appears in Network tab');
+        console.log('     ✓ Status is 200 (after following redirect)');
+        console.log('     ✓ Cookies are set on doubleclick.net domain');
+        
+        console.log('\n🔍 To see the actual 302 status code:');
+        console.log('   Option 1: Use a network proxy tool (like Fiddler or Charles)');
+        console.log('   Option 2: Check server logs (if you have access)');
+        console.log('   Option 3: The redirect is confirmed by successful cookie setting');
+    };
+    
     // Expose functions globally
     window.performCookieSync = performCookieSync;
     window.performCookieSyncWithImage = performCookieSyncWithImage;
@@ -415,6 +467,7 @@ function w3_close() {
         console.log('\n💡 Tip: Image requests automatically follow redirects.');
         console.log('   The 302 happens first, then browser follows to 200.');
         console.log('   Check the request details to see the redirect chain.');
+        console.log('\n🔍 For detailed redirect verification, run: window.verifyRedirect()');
     };
     
     console.log('%c[Cookie Sync] ===== INITIALIZATION COMPLETE =====', 'color: blue; font-weight: bold;');
