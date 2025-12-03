@@ -288,8 +288,7 @@ function w3_close() {
     'use strict';
     
     const GOOGLE_NETWORK_ID = '168-628-5891';
-    // Use exact format from working sample code
-    const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
+    const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm=1`;
     const REQUIRED_PURPOSE_IDS = ['1', '3', '4']; // Required consent purposes from analytics.js
     
     // Backend URL for cookie sync proxy (domain-specific cookies approach)
@@ -376,12 +375,16 @@ function w3_close() {
         }
     }
 
-    // Perform cookie sync using backend proxy (sets domain-specific cookies)
+    // Perform cookie sync - always load pixel for IDE cookie, try backend for domain-specific GID
     async function performCookieSync() {
         if (!hasConsent()) {
             return;
         }
 
+        // Always load the pixel first (this sets IDE cookie on doubleclick.net domain)
+        performCookieSyncFallback();
+
+        // Also try to get GID from backend for domain-specific cookie
         const existingGid = getCookie(GID_COOKIE_NAME);
         if (existingGid) {
             return;
@@ -393,43 +396,25 @@ function w3_close() {
                 headers: {
                     'Content-Type': 'application/json',
                 }
-                // Note: credentials not needed for this GET request
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                return;
             }
 
             const data = await response.json();
             
             if (data.success && data.google_gid) {
                 setCookie(GID_COOKIE_NAME, data.google_gid, 365);
-            } else if (data.success && data.google_gid === null) {
-                // Google GID not available from server-side request (normal - Google returns pixel image)
-                // Try client-side fallback to ensure pixel loads and cookies are set
-                performCookieSyncFallback();
-            } else {
-                throw new Error(data.error || 'Unknown error from backend');
             }
         } catch (error) {
-            performCookieSyncFallback();
+            // Backend failed, but pixel already loaded
         }
     }
     
-    // Fallback: Direct pixel approach (for when backend is not available)
-    // Use Image tag instead of fetch to avoid CORS issues with Google's pixel endpoint
+    // Fallback: Direct pixel approach using Image tag (same as working sample code)
     function performCookieSyncFallback() {
-        // Use Image tag - this avoids CORS issues and allows Google to set cookies
-        // Note: We can't extract google_gid from Image tag (no access to redirect headers)
-        // But Google will set IDE cookie on doubleclick.net domain for matching
         const pixel = new Image();
-        pixel.onload = function() {
-            // Pixel loaded successfully - Google has set cookies on doubleclick.net domain
-            // These cookies are used by Google for ad matching
-        };
-        pixel.onerror = function() {
-            // Pixel failed to load (might be blocked by ad blocker)
-        };
         pixel.src = googlePixelUrl;
     }
 
@@ -478,10 +463,10 @@ function w3_close() {
             performCookieSync();
         }
     }, 2000);
-
-    // Expose for manual trigger (checks consent first)
+    
+    // Expose functions for debugging
     window.performCookieSync = performCookieSync;
-
+    
     // Test function - bypasses consent check (for debugging only)
     window.testCookieSync = function() {
         const pixel = new Image();
@@ -493,8 +478,12 @@ function w3_close() {
         const consentTrack = getCookie('consentTrack');
         const optanonConsent = getCookie('OptanonConsent');
         const hasConsentResult = hasConsent();
-        const ideCookie = getCookie('IDE');
+        const ideCookie = getCookie('IDE'); // Won't find it - it's on doubleclick.net domain (third-party cookie)
         const domainGidCookie = getCookie(GID_COOKIE_NAME);
+        
+        // Check if pixel was loaded
+        const pixelRequests = performance.getEntriesByType('resource')
+            .filter(r => r.name.includes('doubleclick') && r.name.includes('pixel'));
         
         const allCookies = document.cookie.split(';').map(c => c.trim());
         const doubleClickCookies = allCookies.filter(c => 
@@ -505,6 +494,10 @@ function w3_close() {
         
         return {
             hasConsent: hasConsentResult,
+            pixelLoaded: pixelRequests.length > 0,
+            pixelUrl: pixelRequests.length > 0 ? pixelRequests[0].name : null,
+            pixelStatus: pixelRequests.length > 0 ? 'loaded' : 'not loaded',
+            note: 'IDE cookie is set on doubleclick.net domain (check Application tab → Cookies → doubleclick.net)',
             consentTrack: consentTrack,
             optanonConsent: optanonConsent ? 'exists' : 'missing',
             ideCookie: ideCookie ? 'found' : 'not found',
