@@ -412,9 +412,15 @@ function w3_close() {
         }
     }
     
-    // Fallback: Direct pixel approach using Image tag (same as working sample code)
+    // Fallback: Direct pixel approach using Image tag (exact match to working sample code)
     function performCookieSyncFallback() {
         const pixel = new Image();
+        pixel.onload = function() {
+            // Pixel loaded successfully - Google has set cookies on doubleclick.net domain
+        };
+        pixel.onerror = function() {
+            // Pixel failed to load (might be blocked by ad blocker)
+        };
         pixel.src = googlePixelUrl;
     }
 
@@ -485,6 +491,18 @@ function w3_close() {
         const pixelRequests = performance.getEntriesByType('resource')
             .filter(r => r.name.includes('doubleclick') && r.name.includes('pixel'));
         
+        // Get detailed pixel request info
+        let pixelDetails = null;
+        if (pixelRequests.length > 0) {
+            const req = pixelRequests[0];
+            pixelDetails = {
+                url: req.name,
+                status: req.responseStatus || 'unknown',
+                size: req.transferSize || 0,
+                duration: req.duration || 0
+            };
+        }
+        
         const allCookies = document.cookie.split(';').map(c => c.trim());
         const doubleClickCookies = allCookies.filter(c => 
             c.toLowerCase().includes('doubleclick') || 
@@ -495,16 +513,63 @@ function w3_close() {
         return {
             hasConsent: hasConsentResult,
             pixelLoaded: pixelRequests.length > 0,
-            pixelUrl: pixelRequests.length > 0 ? pixelRequests[0].name : null,
+            pixelDetails: pixelDetails,
+            pixelUrl: googlePixelUrl,
             pixelStatus: pixelRequests.length > 0 ? 'loaded' : 'not loaded',
-            note: 'IDE cookie is set on doubleclick.net domain (check Application tab → Cookies → doubleclick.net)',
+            note: 'IDE cookie is set on doubleclick.net domain (check Application tab → Cookies → doubleclick.net). If not visible, check browser privacy settings for third-party cookies.',
             consentTrack: consentTrack,
             optanonConsent: optanonConsent ? 'exists' : 'missing',
-            ideCookie: ideCookie ? 'found' : 'not found',
+            ideCookie: ideCookie ? 'found' : 'not found (expected - it\'s a third-party cookie)',
             domainSpecificCookie: domainGidCookie ? `found (${domainGidCookie})` : 'not found',
             doubleClickCookies: doubleClickCookies,
-            pixelUrl: googlePixelUrl,
-            backendEndpoint: COOKIE_SYNC_ENDPOINT
+            backendEndpoint: COOKIE_SYNC_ENDPOINT,
+            instructions: 'To check doubleclick.net cookies: Open DevTools → Application tab → Cookies → Look for "doubleclick.net" in the domain list'
+        };
+    };
+    
+    // Function to check Network tab for pixel response details
+    window.checkPixelResponse = function() {
+        const pixelRequests = performance.getEntriesByType('resource')
+            .filter(r => r.name.includes('doubleclick') && r.name.includes('pixel'));
+        
+        if (pixelRequests.length === 0) {
+            return {
+                error: 'No pixel requests found. Make sure to run window.testCookieSync() or refresh the page first.',
+                instructions: 'Open Network tab, filter by "pixel", and check the response headers for Set-Cookie'
+            };
+        }
+        
+        return {
+            requests: pixelRequests.map(req => ({
+                url: req.name,
+                status: req.responseStatus || 'unknown',
+                size: req.transferSize || 0,
+                duration: req.duration || 0,
+                note: 'Check Network tab → Headers → Response Headers → Look for "Set-Cookie" header'
+            })),
+            instructions: 'In Network tab, click on the pixel request → Headers tab → Response Headers → Look for "Set-Cookie: IDE=..." header'
+        };
+    };
+    
+    // Function to test if third-party cookies are blocked
+    window.testThirdPartyCookies = function() {
+        const testDomain = 'doubleclick.net';
+        const testUrl = 'https://cm.g.doubleclick.net/favicon.ico';
+        
+        return {
+            test: 'Loading test resource from ' + testDomain,
+            instructions: [
+                '1. Open DevTools → Application tab → Cookies',
+                '2. Look for "' + testDomain + '" in the domain list',
+                '3. If "' + testDomain + '" is NOT listed, third-party cookies are likely blocked',
+                '4. Check browser settings:',
+                '   - Chrome: Settings → Privacy and security → Cookies and other site data → Allow all cookies',
+                '   - Firefox: Settings → Privacy & Security → Cookies and Site Data → Accept cookies and site data',
+                '   - Edge: Settings → Cookies and site permissions → Cookies and site data → Allow all cookies',
+                '5. Also check if you\'re in Incognito/Private mode (cookies are blocked by default)',
+                '6. Disable ad blockers temporarily to test'
+            ],
+            note: 'Modern browsers block third-party cookies by default. You may need to enable them for testing.'
         };
     };
     
