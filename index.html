@@ -36,7 +36,7 @@ function OptanonWrapper() { }
   })  
       
   </script> 
-<script type="text/javascript" src="https://web-analytics-js1-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-js1-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
+<script type="text/javascript" src="https://web-analytics-js3-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-js1-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
     
   </head>
 <body class="w3-content" style="max-width:1200px">
@@ -392,8 +392,8 @@ function w3_close() {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                credentials: 'include'
+                }
+                // Note: credentials not needed for this GET request
             });
 
             if (!response.ok) {
@@ -417,44 +417,20 @@ function w3_close() {
     }
     
     // Fallback: Direct pixel approach (for when backend is not available)
-    // Try to extract google_gid from redirect Location header or IDE cookie
+    // Use Image tag instead of fetch to avoid CORS issues with Google's pixel endpoint
     function performCookieSyncFallback() {
-        // Method 1: Try to get IDE cookie value from doubleclick.net domain
-        // Note: We can't directly read cookies from other domains, but we can try to extract from response
-        // Method 2: Try fetch with manual redirect to extract GID from Location header
-        fetch(googlePixelUrl, {
-            method: 'GET',
-            redirect: 'manual',
-            credentials: 'include'
-        })
-        .then(response => {
-            if (response.status === 302 || response.status === 301 || response.status === 307 || response.status === 308) {
-                const location = response.headers.get('location');
-                if (location) {
-                    // Extract google_gid from redirect URL
-                    const gidMatch = location.match(/google_gid=([^&]+)/);
-                    if (gidMatch && gidMatch[1]) {
-                        setCookie(GID_COOKIE_NAME, gidMatch[1], 365);
-                        return;
-                    }
-                }
-            }
-            
-            // Method 3: If 200 response, check if we can read IDE cookie after pixel loads
-            // Load pixel and then try to extract identifier
-            const pixel = new Image();
-            pixel.onload = function() {
-                // After pixel loads, try to extract identifier from IDE cookie if accessible
-                // Note: We can't directly read cookies from doubleclick.net domain due to same-origin policy
-                // But the cookie is set and Google can use it for matching
-            };
-            pixel.src = googlePixelUrl;
-        })
-        .catch(() => {
-            // If fetch fails, fall back to image loading
-            const pixel = new Image();
-            pixel.src = googlePixelUrl;
-        });
+        // Use Image tag - this avoids CORS issues and allows Google to set cookies
+        // Note: We can't extract google_gid from Image tag (no access to redirect headers)
+        // But Google will set IDE cookie on doubleclick.net domain for matching
+        const pixel = new Image();
+        pixel.onload = function() {
+            // Pixel loaded successfully - Google has set cookies on doubleclick.net domain
+            // These cookies are used by Google for ad matching
+        };
+        pixel.onerror = function() {
+            // Pixel failed to load (might be blocked by ad blocker)
+        };
+        pixel.src = googlePixelUrl;
     }
 
     // Wait for consent and then run cookie sync
