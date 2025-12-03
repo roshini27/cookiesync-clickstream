@@ -16,8 +16,6 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
 <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="0195138c-cdc8-738c-907d-131dad8db9ba-test" ></script>
 <script type="text/javascript">
-// OptanonWrapper will be called by OneTrust when consent is given/updated
-// The cookie sync script will check for consent and run accordingly
 function OptanonWrapper() { }
 </script> 
 <!-- OneTrust Cookies Consent Notice end for testinovation-cdp.vercel.app -->
@@ -34,9 +32,8 @@ function OptanonWrapper() { }
     'segment': 'segment',
     'customerId':'customerId123'
   })  
-      
   </script> 
-<script type="text/javascript" src="https://web-analytics-js3-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-js1-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
+<script type="text/javascript" src="https://web-analytics-js-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
     
   </head>
 <body class="w3-content" style="max-width:1200px">
@@ -282,305 +279,94 @@ function w3_close() {
 
 </script>
 
-<!-- Client-Side Cookie Sync Implementation -->
+<!-- 
+    Client-Side Cookie Sync Implementation
+    
+    This implementation uses the standard client-side pixel approach for cookie synchronization.
+    The browser makes a direct request to Google's pixel endpoint, and Google sets cookies
+    on their domain in response. This is the recommended approach for cookie sync.
+    
+    NOTE: Analytics.js cookie sync is disabled (googleCookieSyncFlag=false) to avoid conflicts.
+    See COOKIE_SYNC_SETUP.md for full documentation.
+-->
 <script>
 (function() {
     'use strict';
     
-    const GOOGLE_NETWORK_ID = '168-628-5891';
-    const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm=1`;
-    const REQUIRED_PURPOSE_IDS = ['1', '3', '4']; // Required consent purposes from analytics.js
+    const currentDomain = window.location.hostname;
+    console.log(`[Cookie Sync] Initializing on ${currentDomain}`);
+
+    // --- Configuration ---
+    // Replace 'YOUR_NETWORK_ID' with your actual Google Ad Manager or advertiser network ID
+    // Example: '168-628-5891' or your network ID
+    const GOOGLE_NETWORK_ID = '168-628-5891'; // Change this to your network ID
     
-    // Backend URL for cookie sync proxy (domain-specific cookies approach)
-    // Try to get from analytics.js config, or use default
-    const backendBaseUrl = (function() {
-        // Try to extract from analytics.js script tag
-        const analyticsScript = document.querySelector('script[src*="analytics.js"]');
-        if (analyticsScript) {
-            const src = analyticsScript.getAttribute('src');
-            const match = src.match(/backendBaseUrl=([^&]+)/);
-            if (match) {
-                return decodeURIComponent(match[1]);
-            }
-        }
-        // Default fallback - adjust based on your deployment
-        return window.location.origin; // Use same origin, or set to your backend URL
-    })();
-    
-    const COOKIE_SYNC_ENDPOINT = `${backendBaseUrl}/api/get-google-gid`;
-    const GID_COOKIE_NAME = 'google_gid'; // Domain-specific cookie name
+    // Build the Google cookie-matching pixel URL
+    const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
 
-    // Helper function to get cookie
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-    }
-    
-    // Helper function to set domain-specific cookie
-    function setCookie(name, value, days = 365) {
-        try {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            const expires = "expires=" + date.toUTCString();
-            const secure = window.location.protocol === 'https:' ? "; Secure" : "";
-            const sameSite = "; SameSite=Lax";
-            const domain = window.location.hostname.split('.').slice(-2).join('.');
-            document.cookie = `${name}=${value}; ${expires}; path=/; domain=.${domain}${secure}${sameSite}`;
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
+    // Perform client-side cookie sync
+    function performCookieSync() {
+        console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
+        console.log('[Cookie Sync] Note: Browser will automatically follow redirects (302 → 200 is normal)');
 
-    // Check if user has given consent
-    function hasConsent() {
-        try {
-            // Method 1: Check consentTrack cookie (set by analytics.js when consent is given)
-            const consentTrack = getCookie('consentTrack');
-            if (consentTrack === 'true') {
-                return true;
-            }
-
-            // Method 2: Check OptanonConsent cookie
-            const optanonConsent = getCookie('OptanonConsent');
-            if (!optanonConsent) {
-                return false;
-            }
-
-            // Parse consent string - format: isGpcEnabled=0&datestamp=...&groups=C0001:1,STACK42:1
-            // Or sometimes: groups=C0001:1,C0003:1,C0004:1
-            const groupsMatch = optanonConsent.match(/groups=([^;]*)/);
-            if (!groupsMatch || !groupsMatch[1]) {
-                return false;
-            }
-            
-            const groups = groupsMatch[1];
-            
-            // Check if required purposes (1, 3, 4) are consented
-            // Format: C0001:1 means purpose 1 is consented (C0001:1 = consented, C0001:0 = not consented)
-            // Purpose IDs: 1 = C0001, 3 = C0003, 4 = C0004
-            const requiredPurposesConsented = REQUIRED_PURPOSE_IDS.every(purposeId => {
-                // Format purpose ID as C0001, C0003, C0004, etc.
-                const purposeKey = 'C' + String(purposeId).padStart(4, '0');
-                // Check if purpose is consented (format: C0001:1)
-                const purposePattern = purposeKey + ':1';
-                return groups.includes(purposePattern);
-            });
-
-            return requiredPurposesConsented;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    // Perform cookie sync - always load pixel for IDE cookie, try backend for domain-specific GID
-    async function performCookieSync() {
-        if (!hasConsent()) {
-            return;
-        }
-
-        // Always load the pixel first (this sets IDE cookie on doubleclick.net domain)
-        performCookieSyncFallback();
-
-        // Also try to get GID from backend for domain-specific cookie
-        const existingGid = getCookie(GID_COOKIE_NAME);
-        if (existingGid) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`${COOKIE_SYNC_ENDPOINT}?bidder_nid=${GOOGLE_NETWORK_ID}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (!response.ok) {
-                return;
-            }
-
-            const data = await response.json();
-            
-            if (data.success && data.google_gid) {
-                setCookie(GID_COOKIE_NAME, data.google_gid, 365);
-            }
-        } catch (error) {
-            // Backend failed, but pixel already loaded
-        }
-    }
-    
-    // Fallback: Direct pixel approach using Image tag (exact match to working sample code)
-    function performCookieSyncFallback() {
+        // Create a new Image object - this is the standard way to fire a tracking pixel
         const pixel = new Image();
+        let pixelLoaded = false;
+
+        // This function runs if the pixel loads successfully
         pixel.onload = function() {
-            // Pixel loaded successfully - Google has set cookies on doubleclick.net domain
+            pixelLoaded = true;
+            console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
+            console.log('[Cookie Sync] Status: 200 OK (browser automatically followed any redirects)');
+            console.log('[Cookie Sync]  Cookie sync request completed!');
+            console.log('[Cookie Sync] 📋 To verify cookies:');
+            console.log('   1. Open DevTools → Application tab → Cookies');
+            console.log('   2. Look for "doubleclick.net" in the left sidebar');
+            console.log('   3. Check if "IDE" or "id" cookies exist there');
+            console.log('   4. If cookies exist on doubleclick.net → Cookie sync is WORKING! ');
         };
+
+        // This function runs if there's an error (e.g., blocked by an ad blocker)
         pixel.onerror = function() {
-            // Pixel failed to load (might be blocked by ad blocker)
+            console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
+            console.error('[Cookie Sync] Possible causes:');
+            console.error('   - Ad blocker is blocking the request');
+            console.error('   - Privacy extension is blocking tracking');
+            console.error('   - Network connectivity issue');
         };
+
+        // Setting the 'src' of the image is what actually makes the browser send the request
+        // This is the critical part - the browser makes a client-side request to Google
+        // Google's server responds and sets cookies on the doubleclick.net domain
+        // Note: Browser automatically follows redirects, so you may see 200 instead of 302
         pixel.src = googlePixelUrl;
+
+        // Optional: Set a timeout to detect if pixel is taking too long
+        setTimeout(function() {
+            if (!pixelLoaded && !pixel.complete) {
+                console.warn('[Cookie Sync] Pixel load is taking longer than expected...');
+                console.warn('[Cookie Sync] Check Network tab to see if request is pending');
+            }
+        }, 10000);
     }
 
-    // Wait for consent and then run cookie sync
-    function waitForConsent() {
-        // Check immediately
-        if (hasConsent()) {
-            performCookieSync();
-            return;
-        }
-
-        // Override OptanonWrapper to detect when consent is given
-        const originalOptanonWrapper = window.OptanonWrapper;
-        window.OptanonWrapper = function() {
-            if (originalOptanonWrapper && typeof originalOptanonWrapper === 'function') {
-                originalOptanonWrapper();
-            }
-            // Check consent after callback (OneTrust updates cookies)
-            setTimeout(function() {
-                if (hasConsent()) {
-                    performCookieSync();
-                }
-            }, 500);
-        };
-
-        // Also poll for consent (in case OptanonWrapper doesn't fire or consent was already given)
-        let pollCount = 0;
-        const maxPolls = 60; // 60 polls * 500ms = 30 seconds
-        const pollInterval = setInterval(function() {
-            pollCount++;
-            if (hasConsent()) {
-                clearInterval(pollInterval);
-                performCookieSync();
-            } else if (pollCount >= maxPolls) {
-                clearInterval(pollInterval);
-            }
-        }, 500);
+    // Auto-start cookie sync when page loads
+    // This ensures cookie sync happens automatically
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', performCookieSync);
+    } else {
+        // DOM already loaded, run immediately
+        performCookieSync();
     }
 
-    // Start waiting for consent
-    waitForConsent();
-
-    // Also try immediately after a short delay (in case consent was already given before script loaded)
-    setTimeout(function() {
-        if (hasConsent()) {
-            performCookieSync();
-        }
-    }, 2000);
-    
-    // Expose functions for debugging
+    // Expose function globally for manual triggering if needed
     window.performCookieSync = performCookieSync;
     
-    // Test function - bypasses consent check (for debugging only)
-    window.testCookieSync = function() {
-        const pixel = new Image();
-        pixel.src = googlePixelUrl;
-    };
-
-    // Diagnostic function to check cookie sync status
-    window.diagnoseCookieSync = function() {
-        const consentTrack = getCookie('consentTrack');
-        const optanonConsent = getCookie('OptanonConsent');
-        const hasConsentResult = hasConsent();
-        const ideCookie = getCookie('IDE'); // Won't find it - it's on doubleclick.net domain (third-party cookie)
-        const domainGidCookie = getCookie(GID_COOKIE_NAME);
-        
-        // Check if pixel was loaded
-        const pixelRequests = performance.getEntriesByType('resource')
-            .filter(r => r.name.includes('doubleclick') && r.name.includes('pixel'));
-        
-        // Get detailed pixel request info
-        let pixelDetails = null;
-        if (pixelRequests.length > 0) {
-            const req = pixelRequests[0];
-            pixelDetails = {
-                url: req.name,
-                status: req.responseStatus || 'unknown',
-                size: req.transferSize || 0,
-                duration: req.duration || 0
-            };
-        }
-        
-        const allCookies = document.cookie.split(';').map(c => c.trim());
-        const doubleClickCookies = allCookies.filter(c => 
-            c.toLowerCase().includes('doubleclick') || 
-            c.toLowerCase().includes('google') ||
-            c.toLowerCase().includes('ide')
-        );
-        
-        return {
-            hasConsent: hasConsentResult,
-            pixelLoaded: pixelRequests.length > 0,
-            pixelDetails: pixelDetails,
-            pixelUrl: googlePixelUrl,
-            pixelStatus: pixelRequests.length > 0 ? 'loaded' : 'not loaded',
-            note: 'IDE cookie is set on doubleclick.net domain (check Application tab → Cookies → doubleclick.net). If not visible, check browser privacy settings for third-party cookies.',
-            consentTrack: consentTrack,
-            optanonConsent: optanonConsent ? 'exists' : 'missing',
-            ideCookie: ideCookie ? 'found' : 'not found (expected - it\'s a third-party cookie)',
-            domainSpecificCookie: domainGidCookie ? `found (${domainGidCookie})` : 'not found',
-            doubleClickCookies: doubleClickCookies,
-            backendEndpoint: COOKIE_SYNC_ENDPOINT,
-            instructions: 'To check doubleclick.net cookies: Open DevTools → Application tab → Cookies → Look for "doubleclick.net" in the domain list'
-        };
-    };
-    
-    // Function to check Network tab for pixel response details
-    window.checkPixelResponse = function() {
-        const pixelRequests = performance.getEntriesByType('resource')
-            .filter(r => r.name.includes('doubleclick') && r.name.includes('pixel'));
-        
-        if (pixelRequests.length === 0) {
-            return {
-                error: 'No pixel requests found. Make sure to run window.testCookieSync() or refresh the page first.',
-                instructions: 'Open Network tab, filter by "pixel", and check the response headers for Set-Cookie'
-            };
-        }
-        
-        return {
-            requests: pixelRequests.map(req => ({
-                url: req.name,
-                status: req.responseStatus || 'unknown',
-                size: req.transferSize || 0,
-                duration: req.duration || 0,
-                note: 'Check Network tab → Headers → Response Headers → Look for "Set-Cookie" header'
-            })),
-            instructions: 'In Network tab, click on the pixel request → Headers tab → Response Headers → Look for "Set-Cookie: IDE=..." header'
-        };
-    };
-    
-    // Function to test if third-party cookies are blocked
-    window.testThirdPartyCookies = function() {
-        const testDomain = 'doubleclick.net';
-        const testUrl = 'https://cm.g.doubleclick.net/favicon.ico';
-        
-        return {
-            test: 'Loading test resource from ' + testDomain,
-            instructions: [
-                '1. Open DevTools → Application tab → Cookies',
-                '2. Look for "' + testDomain + '" in the domain list',
-                '3. If "' + testDomain + '" is NOT listed, third-party cookies are likely blocked',
-                '4. Check browser settings:',
-                '   - Chrome: Settings → Privacy and security → Cookies and other site data → Allow all cookies',
-                '   - Firefox: Settings → Privacy & Security → Cookies and Site Data → Accept cookies and site data',
-                '   - Edge: Settings → Cookies and site permissions → Cookies and site data → Allow all cookies',
-                '5. Also check if you\'re in Incognito/Private mode (cookies are blocked by default)',
-                '6. Disable ad blockers temporarily to test'
-            ],
-            note: 'Modern browsers block third-party cookies by default. You may need to enable them for testing.'
-        };
-    };
-    
-    // Function to verify Network ID is correctly configured
-    window.verifyNetworkId = function() {
-        return {
-            networkId: GOOGLE_NETWORK_ID,
-            pixelUrl: googlePixelUrl,
-            isNidInUrl: googlePixelUrl.includes('google_nid=' + GOOGLE_NETWORK_ID),
-            explanation: 'The cookie sync REQUEST is NID-specific. The cookies themselves are shared Google cookies, but Google uses your NID to attribute the sync to your ad network.'
-        };
+    // Helper function to verify cookie sync status
+    window.verifyCookieSync = function() {
+        console.log('\n2. Cookie Check:');
+        console.log('   - Check for cookies: IDE, id, or test_cookie');
+   
     };
 })();
 </script>
