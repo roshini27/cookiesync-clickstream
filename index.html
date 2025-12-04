@@ -270,47 +270,53 @@ function w3_close() {
 </script>
 
 <!-- ========================================================= -->
-<!-- FINAL: GOOGLE COOKIE SYNC (CHIPS Enabled, 2025 Compatible) -->
+<!-- UPDATED GOOGLE COOKIE SYNC (302 ENABLED + CHIPS SUPPORT) -->
 <!-- ========================================================= -->
 <script>
 async function runGoogleCookieSync() {
-    console.log("🔥 Running Google Cookie Sync with CHIPS support…");
+    console.log("🔥 Running Google Cookie Sync (302 + CHIPS)…");
 
-    const GOOGLE_NID = "1686285891"; // YOUR NETWORK ID
-    const rawUser = crypto.randomUUID();
+    const GOOGLE_NID = "1686285891";  // NO hyphens
+    const rawUserId = crypto.randomUUID();
 
-    async function sha1Hex(msg) {
-        const enc = new TextEncoder().encode(msg);
-        const buf = await crypto.subtle.digest("SHA-1", enc);
-        return [...new Uint8Array(buf)]
+    // SHA-1 → HEX function
+    async function sha1Hex(value) {
+        const data = new TextEncoder().encode(value);
+        const hash = await crypto.subtle.digest("SHA-1", data);
+        return [...new Uint8Array(hash)]
             .map(b => b.toString(16).padStart(2, "0"))
             .join("");
     }
 
-    const hashed = await sha1Hex(rawUser);
+    const hashedUserId = await sha1Hex(rawUserId);
 
-    const redirectUrl = encodeURIComponent("https://soundandsilence.in/sync_done");
+    // FORCE a visible redirect → produces 302
+    const finalRedirect = encodeURIComponent("https://soundandsilence.in/sync_done");
 
-    const pixelUrl =
-        `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NID}` +
-        `&google_hm=${hashed}` +
-        `&google_cm=1` +
-        `&tag_debug=1` +
-        `&ext=1` +
-        `&redirect=${redirectUrl}`;
+    // FULL COOKIE SYNC URL
+    const syncUrl =
+        "https://cm.g.doubleclick.net/pixel?" +
+        "google_nid=" + GOOGLE_NID +
+        "&google_cm=1" +
+        "&google_hm=" + hashedUserId +
+        "&tag_debug=1" +         // shows redirects
+        "&ext=1" +               // expands detailed logs
+        "&redirect=" + finalRedirect;
 
+    console.log("📡 Sending Cookie Sync to:", syncUrl);
+
+    // CHIPS-Compatible Iframe (2025 requirement)
     const iframe = document.createElement("iframe");
-    iframe.src = pixelUrl;
+    iframe.src = syncUrl;
     iframe.width = 1;
     iframe.height = 1;
-    iframe.allow = "partitioned-cookies;";  // ⭐ CHIPS magic
     iframe.style.display = "none";
+    iframe.allow = "partitioned-cookies; cross-origin-resource-policy=*";
 
     document.body.appendChild(iframe);
-
-    console.log("📡 Google Sync Pixel Sent:", pixelUrl);
 }
 </script>
+
 
 </body>
 </html>
