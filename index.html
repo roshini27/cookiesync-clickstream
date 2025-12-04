@@ -11,12 +11,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
-      .w3-sidebar a {font-family: "Roboto", sans-serif}
-      body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
+      .w3-sidebar a { font-family: "Roboto", sans-serif }
+      body,h1,h2,h3,h4,h5,h6,.w3-wide { font-family: "Montserrat", sans-serif }
     </style>
 
-    <!-- OneTrust Cookies Consent Notice start -->
+    <!-- ========================================================= -->
+    <!-- ONE TRUST CMP -->
+    <!-- ========================================================= -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+
     <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
       type="text/javascript"
       charset="UTF-8"
@@ -24,58 +27,65 @@
     </script>
 
     <script>
+      // OneTrust calls this automatically AFTER consent is given.
       function OptanonWrapper() {
-        // OneTrust will call this after consent
-        // Google sync script is injected below at the bottom of body
+        console.log("OneTrust: Consent granted → triggering Google Sync");
+        runGoogleSync();
       }
     </script>
-    <!-- OneTrust Cookies Consent Notice end -->
 
-    <!-- Adobe Launch -->
+
     <script src="https://assets.adobedtm.com/e72b4113c11a/dea835227b36/launch-5cc6da518e0d-development.min.js" async></script>
 
-    <!-- DataLayer -->
+
     <script>
       window.dataLayer = window.dataLayer || [];
       dataLayer.push({
-        'pageEnvironment': 'testPageEnvironment',
-        'pageContentType': 'pageContentType',
-        'pageName': 'Homepage',
-        'loggedIn': 'loggedIn',
-        'consentVersion': 'consentVersion',
-        'type': 'type',
-        'segment': 'segment',
-        'customerId':'customerId123'
+        pageEnvironment: 'testPageEnvironment',
+        pageContentType: 'pageContentType',
+        pageName: 'Homepage',
+        loggedIn: 'loggedIn',
+        consentVersion: 'consentVersion',
+        type: 'type',
+        segment: 'segment',
+        customerId: 'customerId123'
       });
     </script>
 
-    <!-- analytics.js -->
-    <script src="https://web-analytics-js-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-js1-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
+
+    <script src="https://web-analytics-js2-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-js1-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
 
   </head>
 
+
+
 <body class="w3-content" style="max-width:1200px">
 
-<!-- Google Tag Manager (noscript) -->
+<!-- GTM noscript -->
 <noscript>
   <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NPRLPX6Q"
     height="0" width="0" style="display:none;visibility:hidden">
   </iframe>
 </noscript>
-<!-- End Google Tag Manager -->
 
 <!-- Sidebar/menu -->
-<nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top" style="z-index:3;width:250px" id="mySidebar">
+<nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top"
+     style="z-index:3;width:250px" id="mySidebar">
+
   <div class="w3-container w3-display-container w3-padding-16">
     <i onclick="w3_close()" class="fa fa-remove w3-hide-large w3-button w3-display-topright"></i>
     <h3 class="w3-wide"><b>LOGO</b></h3>
   </div>
+
   <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
     <a href="#" class="w3-bar-item w3-button">Shirts</a>
     <a href="#" class="w3-bar-item w3-button">Dresses</a>
-    <a onclick="myAccFunc()" href="javascript:void(0)" class="w3-button w3-block w3-white w3-left-align" id="myBtn">
+
+    <a onclick="myAccFunc()" href="javascript:void(0)"
+       class="w3-button w3-block w3-white w3-left-align" id="myBtn">
       Jeans <i class="fa fa-caret-down"></i>
     </a>
+
     <div id="demoAcc" class="w3-bar-block w3-hide w3-padding-large w3-medium">
       <a href="#" class="w3-bar-item w3-button w3-light-grey">
         <i class="fa fa-caret-right w3-margin-right"></i>Skinny
@@ -84,25 +94,34 @@
       <a href="#" class="w3-bar-item w3-button">Bootcut</a>
       <a href="#" class="w3-bar-item w3-button">Straight</a>
     </div>
+
     <a href="#" class="w3-bar-item w3-button">Jackets</a>
     <a href="#" class="w3-bar-item w3-button">Gymwear</a>
     <a href="#" class="w3-bar-item w3-button">Blazers</a>
     <a href="#" class="w3-bar-item w3-button">Shoes</a>
   </div>
+
   <a href="#footer" class="w3-bar-item w3-button w3-padding">Contact</a>
   <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding"
-     onclick="document.getElementById('newsletter').style.display='block'">Newsletter</a>
+     onclick="document.getElementById('newsletter').style.display='block'">
+     Newsletter
+  </a>
+
   <a href="#footer" class="w3-bar-item w3-button w3-padding">Subscribe</a>
 </nav>
 
-<!-- Top menu small screens -->
+
 <header class="w3-bar w3-top w3-hide-large w3-black w3-xlarge">
   <div class="w3-bar-item w3-padding-24 w3-wide">LOGO</div>
-  <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding-24 w3-right"
-     onclick="w3_open()"><i class="fa fa-bars"></i></a>
+  <a href="javascript:void(0)"
+     class="w3-bar-item w3-button w3-padding-24 w3-right"
+     onclick="w3_open()">
+     <i class="fa fa-bars"></i>
+  </a>
 </header>
 
 <div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" id="myOverlay"></div>
+
 
 <div class="w3-main" style="margin-left:250px">
 
@@ -117,12 +136,23 @@
   </header>
 
   <div class="w3-display-container w3-container">
-    <img src="https://www.w3schools.com/w3images/jeans.jpg" alt="Jeans" style="width:100%">
-    <div class="w3-display-topleft w3-text-white" style="padding:24px 48px">
+    <img src="https://www.w3schools.com/w3images/jeans.jpg"
+         alt="Jeans" style="width:100%">
+
+    <div class="w3-display-topleft w3-text-white"
+         style="padding:24px 48px">
+
       <h1 class="w3-jumbo w3-hide-small">New arrivals</h1>
       <h1 class="w3-hide-large w3-hide-medium">New arrivals</h1>
       <h1 class="w3-hide-small">COLLECTION 2016</h1>
-      <p><a href="#jeans" id="shopnow" class="w3-button w3-black w3-padding-large w3-large">SHOP NOW</a></p>
+
+      <p>
+        <a href="#jeans" id="shopnow"
+           class="w3-button w3-black w3-padding-large w3-large">
+           SHOP NOW
+        </a>
+      </p>
+
     </div>
   </div>
 
@@ -130,11 +160,8 @@
     <p>8 items</p>
   </div>
 
-  <!-- Product grid -->
-  <div class="w3-row w3-grayscale">
-    <!-- All your product items remain unchanged -->
-    … (your product grid here — unchanged) …
-  </div>
+  <!-- Grid removed for brevity; you can keep your product items -->
+  <!-- Everything else remains the same as your template -->
 
   <div class="w3-container w3-black w3-padding-32">
     <h1>Subscribe</h1>
@@ -144,9 +171,6 @@
   </div>
 
   <footer class="w3-padding-64 w3-light-grey w3-small w3-center" id="footer">
-
-    … (your entire footer remains unchanged) …
-
     <button id="ot-sdk-btn" class="ot-sdk-show-settings">Cookie Settings</button>
   </footer>
 
@@ -158,65 +182,84 @@
 
 <!-- Newsletter Modal -->
 <div id="newsletter" class="w3-modal">
-   … unchanged …
+  <div class="w3-modal-content w3-animate-zoom" style="padding:32px">
+    <div class="w3-container w3-white w3-center">
+      <h1 class="w3-wide">NEWSLETTER</h1>
+      <p>Join our mailing list to receive updates on new arrivals and special offers.</p>
+      <input class="w3-input w3-border" type="text" placeholder="Enter e-mail">
+      <button type="button" class="w3-button w3-padding-large w3-red w3-margin-bottom"
+        onclick="document.getElementById('newsletter').style.display='none'">Subscribe</button>
+    </div>
+  </div>
 </div>
 
-<script>
-// Accordion 
-function myAccFunc() { … }
-function w3_open() { … }
-function w3_close() { … }
 
-// Other UI scripts remain unchanged
+
+<script>
+function myAccFunc() {
+  var x = document.getElementById("demoAcc");
+  if (x.className.indexOf("w3-show") == -1) {
+    x.className += " w3-show";
+  } else {
+    x.className = x.className.replace(" w3-show", "");
+  }
+}
+
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+  document.getElementById("myOverlay").style.display = "block";
+}
+
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+  document.getElementById("myOverlay").style.display = "none";
+}
 </script>
 
 
-<!-- ⭐⭐⭐ GOOGLE COOKIE SYNC SCRIPT (PLACED BEFORE </body>) ⭐⭐⭐ -->
+
 <script>
-async function sha1(message) {
-  const data = new TextEncoder().encode(message);
-  const hash = await crypto.subtle.digest("SHA-1", data);
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
+// SHA-1 → hex conversion (required by DoubleClick)
+async function sha1Hex(msg) {
+    const enc = new TextEncoder().encode(msg);
+    const buffer = await crypto.subtle.digest("SHA-1", enc);
+    return [...new Uint8Array(buffer)]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
 }
 
 async function runGoogleSync() {
-  const GOOGLE_NETWORK_ID = "1686285891";  // MUST be without hyphens
+    console.log(" Running Google Cookie Sync…");
 
-  // Use your own ID or analytics.js customerId
-  const uid = "u_" + Math.random().toString(36).substring(2);
-  const hashedUid = await sha1(uid);
+    const GOOGLE_NID = "1686285891"; // MUST be numeric, no hyphens
 
-  const redirect = encodeURIComponent("https://example.com/final");
+    // You can replace this with your userID cookie if needed
+    const rawUserId = "u_" + crypto.randomUUID();
+    const hashedUserId = await sha1Hex(rawUserId);
 
-  const pixelUrl =
-    "https://cm.g.doubleclick.net/pixel?" +
-    "google_nid=" + GOOGLE_NETWORK_ID +
-    "&google_hm=" + hashedUid +
-    "&redirect=" + redirect +
-    "&ext=1" +        // document-mode redirect
-    "&tag_debug=1";   // show 302 redirects
+    const google_hm = encodeURIComponent(hashedUserId);
+    const redirectURL = encodeURIComponent("https://example.com/sync_complete");
 
-  const iframe = document.createElement("iframe");
-  iframe.src = pixelUrl;
-  iframe.width = 1;
-  iframe.height = 1;
-  iframe.style.display = "none";
-  document.body.appendChild(iframe);
+    const pixelURL =
+        `https://cm.g.doubleclick.net/pixel?` +
+        `google_nid=${GOOGLE_NID}` +
+        `&google_cm=1` +
+        `&google_hm=${google_hm}` +
+        `&tag_debug=1` +
+        `&ext=1` +
+        `&redirect=${redirectURL}`;
 
-  console.log("Google Sync fired:", pixelUrl);
+    const iframe = document.createElement("iframe");
+    iframe.src = pixelURL;
+    iframe.width = 1;
+    iframe.height = 1;
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+
+    console.log(" Sync fired:", pixelURL);
 }
 </script>
 
-
-<script>
-// OneTrust executes this function AFTER user grants consent
-function OptanonWrapper() {
-    console.log("Consent given — Running Google Cookie Sync");
-    runGoogleSync();
-}
-</script>
 
 </body>
 </html>
