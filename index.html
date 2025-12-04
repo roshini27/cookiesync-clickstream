@@ -1,337 +1,152 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>W3.CSS Template</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <style>
-    .w3-sidebar a {font-family: "Roboto", sans-serif}
-    body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
-    </style>  
-  <!-- OneTrust Cookies Consent Notice start for testinovation-cdp.vercel.app -->
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
-<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="0195138c-cdc8-738c-907d-131dad8db9ba-test" ></script>
-<script type="text/javascript">
-function OptanonWrapper() { }
-</script> 
-<!-- OneTrust Cookies Consent Notice end for testinovation-cdp.vercel.app -->
-    <script src="https://assets.adobedtm.com/e72b4113c11a/dea835227b36/launch-5cc6da518e0d-development.min.js" async></script>
-    <script type="text/javascript">
-    window.dataLayer=window.dataLayer || [];
-    dataLayer.push({
-    'pageEnvironment' : 'testPageEnvironment',
-    'pageContentType': 'pageContentType',
-    'pageName':'Homepage',
-    'loggedIn': 'loggedIn',
-    'consentVersion':'consentVersion',
-    'type': 'type',
-    'segment': 'segment',
-    'customerId':'customerId123'
-  })  
-      
-  </script> 
-<script type="text/javascript" src="https://web-analytics-js-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
+const express = require('express');
+const axios = require('axios');
+const fs = require('fs');
+require('dotenv').config();
+
+const app = express();
+
+// Error handling middleware - must be first
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Manual CORS middleware - ensures headers are always set
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
     
-  </head>
-<body class="w3-content" style="max-width:1200px">
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NPRLPX6Q"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-<!-- Sidebar/menu -->
-<nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top" style="z-index:3;width:250px" id="mySidebar">
-  <div class="w3-container w3-display-container w3-padding-16">
-    <i onclick="w3_close()" class="fa fa-remove w3-hide-large w3-button w3-display-topright"></i>
-    <h3 class="w3-wide"><b>LOGO</b></h3>
-  </div>
-  <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
-    <a href="#" class="w3-bar-item w3-button">Shirts</a>
-    <a href="#" class="w3-bar-item w3-button">Dresses</a>
-    <a onclick="myAccFunc()" href="javascript:void(0)" class="w3-button w3-block w3-white w3-left-align" id="myBtn">
-      Jeans <i class="fa fa-caret-down"></i>
-    </a>
-    <div id="demoAcc" class="w3-bar-block w3-hide w3-padding-large w3-medium">
-      <a href="#" class="w3-bar-item w3-button w3-light-grey"><i class="fa fa-caret-right w3-margin-right"></i>Skinny</a>
-      <a href="#" class="w3-bar-item w3-button">Relaxed</a>
-      <a href="#" class="w3-bar-item w3-button">Bootcut</a>
-      <a href="#" class="w3-bar-item w3-button">Straight</a>
-    </div>
-    <a href="#" class="w3-bar-item w3-button">Jackets</a>
-    <a href="#" class="w3-bar-item w3-button">Gymwear</a>
-    <a href="#" class="w3-bar-item w3-button">Blazers</a>
-    <a href="#" class="w3-bar-item w3-button">Shoes</a>
-  </div>
-  <a href="#footer" class="w3-bar-item w3-button w3-padding">Contact</a> 
-  <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding" onclick="document.getElementById('newsletter').style.display='block'">Newsletter</a> 
-  <a href="#footer"  class="w3-bar-item w3-button w3-padding">Subscribe</a>
-</nav>
+    // Allow all origins (for development/testing)
+    // In production, replace '*' with specific domains
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+    res.header('Access-Control-Max-Age', '3600');
+    
+    // Handle preflight OPTIONS requests
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    
+    next();
+});
 
-<!-- Top menu on small screens -->
-<header class="w3-bar w3-top w3-hide-large w3-black w3-xlarge">
-  <div class="w3-bar-item w3-padding-24 w3-wide">LOGO</div>
-  <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding-24 w3-right" onclick="w3_open()"><i class="fa fa-bars"></i></a>
+// Body parser middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-</header>
+// Static files (only if public directory exists, otherwise skip)
+try {
+    if (fs.existsSync('./public')) {
+        app.use(express.static('public'));
+    } else if (fs.existsSync('.')) {
+        // Fallback: serve current directory if no public folder
+        app.use(express.static('.'));
+    }
+} catch (error) {
+    console.log('Static file serving skipped:', error.message);
+}
 
-<!-- Overlay effect when opening sidebar on small screens -->
-<div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        message: 'Server is running',
+        timestamp: new Date().toISOString()
+    });
+});
 
-<!-- !PAGE CONTENT! -->
-<div class="w3-main" style="margin-left:250px">
+// Telegram configuration
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = '1197255819'; // Your Telegram chat ID
 
-  <!-- Push down content on small screens -->
-  <div class="w3-hide-large" style="margin-top:83px"></div>
-  
-  <!-- Top header -->
-  <header class="w3-container w3-xlarge">
-    <p class="w3-left">Jeans</p>
-    <p class="w3-right">
-      <i class="fa fa-shopping-cart w3-margin-right"></i>
-      <i class="fa fa-search"></i>
-    </p>
-  </header>
-
-  <!-- Image header -->
-  <div class="w3-display-container w3-container">
-    <img src="https://www.w3schools.com/w3images/jeans.jpg" alt="Jeans" style="width:100%">
-    <div class="w3-display-topleft w3-text-white" style="padding:24px 48px">
-      <h1 class="w3-jumbo w3-hide-small">New arrivals</h1>
-      <h1 class="w3-hide-large w3-hide-medium">New arrivals</h1>
-      <h1 class="w3-hide-small">COLLECTION 2016</h1>
-      <p><a href="#jeans" id="shopnow" class="w3-button w3-black w3-padding-large w3-large">SHOP NOW</a></p>
-    </div>
-  </div>
-
-  <div class="w3-container w3-text-grey" id="jeans">
-    <p>8 items</p>
-  </div>
-
-  <!-- Product grid -->
-  <div class="w3-row w3-grayscale">
-    <div class="w3-col l3 s6">
-      <div class="w3-container">
-        <img src="https://www.w3schools.com/w3images/jeans1.jpg" style="width:100%">
-        <p>Ripped Skinny Jeans<br><b>$24.99</b></p>
-      </div>
-      <div class="w3-container">
-        <img src="https://www.w3schools.com/w3images/jeans2.jpg" style="width:100%">
-        <p>Mega Ripped Jeans<br><b>$19.99</b></p>
-      </div>
-    </div>
-
-    <div class="w3-col l3 s6">
-      <div class="w3-container">
-        <div class="w3-display-container">
-          <img src="https://www.w3schools.com/w3images/jeans2.jpg" style="width:100%">
-          <span class="w3-tag w3-display-topleft">New</span>
-          <div class="w3-display-middle w3-display-hover">
-            <button id="buynow" class="w3-button w3-black">Buy now <i class="fa fa-shopping-cart"></i></button>
-          </div>
-        </div>
-        <p>Mega Ripped Jeans<br><b>$19.99</b></p>
-      </div>
-      <div class="w3-container">
-        <img src="https://www.w3schools.com/w3images/jeans3.jpg" style="width:100%">
-        <p>Washed Skinny Jeans<br><b>$20.50</b></p>
-      </div>
-    </div>
-
-    <div class="w3-col l3 s6">
-      <div class="w3-container">
-        <img src="https://www.w3schools.com/w3images/jeans3.jpg" style="width:100%">
-        <p>Washed Skinny Jeans<br><b>$20.50</b></p>
-      </div>
-      <div class="w3-container">
-        <div class="w3-display-container">
-          <img src="https://www.w3schools.com/w3images/jeans4.jpg" style="width:100%">
-          <span class="w3-tag w3-display-topleft">Sale</span>
-          <div class="w3-display-middle w3-display-hover">
-            <button class="w3-button w3-black">Buy now <i class="fa fa-shopping-cart"></i></button>
-          </div>
-        </div>
-        <p>Vintage Skinny Jeans<br><b class="w3-text-red">$14.99</b></p>
-      </div>
-    </div>
-
-    <div class="w3-col l3 s6">
-      <div class="w3-container">
-        <img src="https://www.w3schools.com/w3images/jeans4.jpg" style="width:100%">
-        <p>Vintage Skinny Jeans<br><b>$14.99</b></p>
-      </div>
-      <div class="w3-container">
-        <img src="https://www.w3schools.com/w3images/jeans1.jpg" style="width:100%">
-        <p>Ripped Skinny Jeans<br><b>$24.99</b></p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Subscribe section -->
-  <div class="w3-container w3-black w3-padding-32">
-    <h1>Subscribe</h1>
-    <p>To get special offers and VIP treatment:</p>
-    <p><input class="w3-input w3-border" type="text" placeholder="Enter e-mail" style="width:100%"></p>
-    <button type="button" class="w3-button w3-red w3-margin-bottom">Subscribe</button>
-  </div>
-  
-  <!-- Footer -->
-  <footer class="w3-padding-64 w3-light-grey w3-small w3-center" id="footer">
-    <div class="w3-row-padding">
-      <div class="w3-col s4">
-        <h4>Contact</h4>
-        <p>Questions? Go ahead.</p>
-        <form action="/action_page.php" target="_blank">
-          <p><input class="w3-input w3-border" type="text" placeholder="Name" name="Name" required></p>
-          <p><input class="w3-input w3-border" type="text" placeholder="Email" name="Email" required></p>
-          <p><input class="w3-input w3-border" type="text" placeholder="Subject" name="Subject" required></p>
-          <p><input class="w3-input w3-border" type="text" placeholder="Message" name="Message" required></p>
-          <button type="submit" class="w3-button w3-block w3-black">Send</button>
-        </form>
-      </div>
-
-      <div class="w3-col s4">
-        <h4>About</h4>
-        <p><a href="#">About us</a></p>
-        <p><a href="#">We're hiring</a></p>
-        <p><a href="#">Support</a></p>
-        <p><a href="#">Find store</a></p>
-        <p><a href="testpage.html">test page</a></p>
-         <p><a href="testpageone.html">test page one</a></p>
-        <p><a href="testpagetwo.html?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale&utm_term=test_term&utm_content=test_content">test page two</a></p>
-        <p><a href="testpagethree.html">test page three</a></p>
-        <p><a href="https://www.test.anotherdomain.com">Help</a></p>
-        <p><a href="https://www.youtube.com/watch?v=EerdGm-ehJQ">play video</a></p>
-      </div>
-
-      <div class="w3-col s4 w3-justify">
-        <h4>Store</h4>
-        <p><i class="fa fa-fw fa-map-marker"></i> Company Name</p>
-        <p><i class="fa fa-fw fa-phone"></i> 0044123123</p>
-        <p><i class="fa fa-fw fa-envelope"></i> ex@mail.com</p>
-        <h4>We accept</h4>
-        <p><i class="fa fa-fw fa-cc-amex"></i> Amex</p>
-        <p><i class="fa fa-fw fa-credit-card"></i> Credit Card</p>
-        <br>
-        <a href="https://clickstromtest.vercel.app/">https://clickstromtest.vercel.app</a> <br></br>
-        <a href="https://development-site-three.vercel.app/">https://development-site-three.vercel.app</a> <br></br>
-        <a href = "https://www.facebook.com/" class="fa fa-facebook-official w3-hover-opacity w3-large"></a>
-        <i class="fa fa-instagram w3-hover-opacity w3-large"></i>
-        <i class="fa fa-snapchat w3-hover-opacity w3-large"></i>
-        <i class="fa fa-pinterest-p w3-hover-opacity w3-large"></i>
-        <i class="fa fa-twitter w3-hover-opacity w3-large"></i>
-        <i class="fa fa-linkedin w3-hover-opacity w3-large"></i>
-       
-       <!-- <iframe width="420" height="315" src="https://player.vimeo.com/video/76979871" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  -->
+// Analytics endpoint - /sendevent (for your script.js)
+app.post('/sendevent', async (req, res) => {
+    try {
+        const eventData = req.body;
         
-      </div>
-    </div>
+        // Process your analytics event here
+        console.log('Analytics event received:', eventData);
+        
+        // Return success response
+        res.json({
+            status: 'success',
+            message: 'Event received',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error processing analytics event:', error);
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+});
 
-    <!-- OneTrust Cookies Settings button start -->
- <button id="ot-sdk-btn" class="ot-sdk-show-settings">Cookie Settings</button>
-<!-- OneTrust Cookies Settings button end -->
-  </footer>  
+// Handle form submission
+app.post('/submit-form', async (req, res) => {
+    // CORS headers already set by middleware above
+    try {
+        const { name, email, phone, location, message } = req.body;
+        
+        // Create message for Telegram
+        const telegramMessage = `
+🔔 New Contact Form Submission
 
-  <div class="w3-black w3-center w3-padding-24">Made with <a href="https://www.w3schools.com/spaces" title="W3.CSS" target="_blank" class="w3-hover-opacity">W3Schools Spaces</a></div>
+👤 Name: ${name}
+📧 Email: ${email}
+📱 Phone: ${phone}
+📍 Location: ${location}
+💬 Message: ${message}
+        `;
 
-  <!-- End page content -->
-</div>
+        // Send to Telegram
+        const response = await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: telegramMessage,
+            parse_mode: 'HTML'
+        });
 
-<!-- Newsletter Modal -->
-<div id="newsletter" class="w3-modal">
-  <div class="w3-modal-content w3-animate-zoom" style="padding:32px">
-    <div class="w3-container w3-white w3-center">
-      <i onclick="document.getElementById('newsletter').style.display='none'" class="fa fa-remove w3-right w3-button w3-transparent w3-xxlarge"></i>
-      <h2 class="w3-wide">NEWSLETTER</h2>
-      <p>Join our mailing list to receive updates on new arrivals and special offers.</p>
-      <p><input class="w3-input w3-border" type="text" placeholder="Enter e-mail"></p>
-      <button type="button" class="w3-button w3-padding-large w3-red w3-margin-bottom" onclick="document.getElementById('newsletter').style.display='none'">Subscribe</button>
-    </div>
-  </div>
-</div>
+        if (response.data.ok) {
+            res.json({ success: true, message: 'Form submitted successfully!' });
+        } else {
+            throw new Error('Failed to send Telegram message');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ success: false, message: 'Error submitting form' });
+    }
+});
 
-<script>
-// Accordion 
-function myAccFunc() {
-  var x = document.getElementById("demoAcc");
-  if (x.className.indexOf("w3-show") == -1) {
-    x.className += " w3-show";
-  } else {
-    x.className = x.className.replace("w3-show", "");
-  }
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({
+        status: 'error',
+        message: err.message || 'Internal server error'
+    });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        status: 'error',
+        message: 'Endpoint not found'
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+
+// Start server with error handling
+try {
+    app.listen(PORT, () => {
+        console.log(`✅ Server running on port ${PORT}`);
+        console.log(`✅ CORS enabled for all origins`);
+        console.log(`✅ Health check: http://localhost:${PORT}/health`);
+    });
+} catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
 }
-
-// Click on the "Jeans" link on page load to open the accordion for demo purposes
-document.getElementById("myBtn").click();
-
-
-// Open and close sidebar
-function w3_open() {
-  document.getElementById("mySidebar").style.display = "block";
-  document.getElementById("myOverlay").style.display = "block";
-}
- 
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-  document.getElementById("myOverlay").style.display = "none";
-}
-
-</script>
-
-<!-- Client-Side Cookie Sync Implementation -->
-<script>
-(function() {
-    'use strict';
-    
-    const GOOGLE_NETWORK_ID = '168-628-5891';
-    const googlePixelUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NETWORK_ID}&google_cm`;
-
-    console.log(`[Cookie Sync] Attempting to load tracking pixel from: ${googlePixelUrl}`);
-
-    // Create a new Image object - this is the standard way to fire a tracking pixel
-    const pixel = new Image();
-
-    // This function runs if the pixel loads successfully
-    pixel.onload = function() {
-        console.log('%c[Cookie Sync] SUCCESS: Google tracking pixel was loaded successfully.', 'color: green; font-weight: bold;');
-        console.log('[Cookie Sync] This means the request to Google\'s servers was sent. The cookie sync happens on their end.');
-        console.log('[Cookie Sync] Please check the "Network" and "Application" tabs to verify.');
-    };
-
-    // This function runs if there's an error (e.g., blocked by an ad blocker)
-    pixel.onerror = function() {
-        console.error('%c[Cookie Sync] ERROR: The pixel request was blocked.', 'color: red; font-weight: bold;');
-        console.error('[Cookie Sync] This is almost always caused by a browser extension like an ad blocker or a privacy protector.');
-        console.error('[Cookie Sync] Please disable it for this domain and try again.');
-    };
-
-    // Setting the 'src' of the image is what actually makes the browser send the request
-    // This executes immediately when the script loads (just like the example)
-    pixel.src = googlePixelUrl;
-
-    console.log('[Cookie Sync] --- Verification Steps ---');
-    console.log('[Cookie Sync] 1. Go to the "Network" tab in the developer tools.');
-    console.log('[Cookie Sync] 2. Type "pixel" into the filter box.');
-    console.log('[Cookie Sync] 3. You should see a successful request (Status 200 or 302) to "cm.g.doubleclick.net".');
-    console.log('[Cookie Sync] 4. Go to the "Application" tab -> Cookies -> and look for the "doubleclick.net" domain.');
-    console.log('[Cookie Sync] 5. You should see cookies like "id" or "IDE". This confirms the sync worked.');
-
-    // Expose for manual trigger
-    window.performCookieSync = function() {
-        const newPixel = new Image();
-        newPixel.onload = function() {
-            console.log('%c[Cookie Sync] Cookie sync successful', 'color: green; font-weight: bold;');
-        };
-        newPixel.onerror = function() {
-            console.error('%c[Cookie Sync] Cookie sync failed', 'color: red; font-weight: bold;');
-        };
-        newPixel.src = googlePixelUrl;
-    };
-})();
-</script>
- 
-</body>
-</html>
-
