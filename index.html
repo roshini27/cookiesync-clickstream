@@ -208,48 +208,55 @@ function w3_close() {
 </script>
 
 
-<!-- ========================================================= -->
-<!-- FINAL GOOGLE COOKIE SYNC (WORKING IN 2025) -->
-<!-- ========================================================= -->
+
+<!-- GOOGLE COOKIE SYNC (Final + Stable Version) -->
 <script>
-async function sha1Hex(value) {
-    const data = new TextEncoder().encode(value);
+(function () {
+  console.log("🔥 Google DoubleClick Cookie Sync Starting…");
+
+  const GOOGLE_NID = "1686285891"; // your ad network ID (NO hyphens)
+
+  async function sha1hex(input) {
+    const data = new TextEncoder().encode(input);
     const hash = await crypto.subtle.digest("SHA-1", data);
-    return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,'0')).join('');
-}
+    return [...new Uint8Array(hash)]
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
 
-async function runGoogleCookieSync() {
-    console.log("🔥 Running Google Cookie Sync (302 Redirect + CHIPS)…");
+  async function runCookieSync() {
+    const randomUser = crypto.randomUUID();  
+    const hashed = await sha1hex(randomUser);
 
-    const GOOGLE_NID = "1686285891";
+    // MUST END WITH A REDIRECT → causes 302
+    const redirectUrl = encodeURIComponent("https://cookiesync-clickstream.vercel.app/sync_done");
 
-    const userId = "u_" + crypto.randomUUID();
-    const hashed = await sha1Hex(userId);
+    const syncUrl =
+      "https://cm.g.doubleclick.net/pixel?" +
+      "google_nid=" + GOOGLE_NID +
+      "&google_cm=1" +                 // MUST for DoubleClick sync
+      "&google_hm=" + hashed +         // hashed user ID
+      "&tag_debug=1" +                 // show 302 chain
+      "&redirect=" + redirectUrl;      // force 302
 
-    // Your Vercel redirect endpoint
-    const redirectUrl = encodeURIComponent("https://cookiesync-clickstream-sb8k.vercel.app/done");
+    console.log("📡 Sending Google Sync →", syncUrl);
 
-    const pixelUrl =
-        "https://cm.g.doubleclick.net/pixel?" +
-        "google_nid=" + GOOGLE_NID +
-        "&google_cm=1" +
-        "&google_hm=" + hashed +
-        "&tag_debug=1" +
-        "&ext=1" +
-        "&redirect=" + redirectUrl;
-
-    console.log("📡 Sending:", pixelUrl);
-
+    // Use iframe → real 302 visible in Network
     const iframe = document.createElement("iframe");
-    iframe.src = pixelUrl;
+    iframe.src = syncUrl;
     iframe.width = 1;
     iframe.height = 1;
     iframe.style.display = "none";
-    iframe.allow = "partitioned-cookies";
-
+    iframe.allow = "partitioned-cookies";  // required for CHIPS 
     document.body.appendChild(iframe);
-}
+  }
+
+  // Delay a bit (OneTrust sometimes loads late)
+  window.addEventListener("load", () => setTimeout(runCookieSync, 1500));
+
+})();
 </script>
+
 
 </body>
 </html>
