@@ -50,7 +50,7 @@
     <!-- Analytics.js -->
     <script 
       type="text/javascript"
-      src="https://web-analytics-js4-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream-1mj2.vercel.app%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
+      src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream-1mj2.vercel.app%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
     </script>
 
   </head>
@@ -192,33 +192,30 @@ function w3_close() {
 }
 </script>
 
+
 <!-- ========================================== -->
-<!-- FIXED GOOGLE COOKIE SYNC WITH IDE COOKIE -->
-<!-- ========================================== -->
-<!-- CORRECT - Use this instead -->
-<!-- ========================================== -->
-<!-- ✅ REAL GOOGLE COOKIE SYNC (NO FAKE IDE) -->
+<!--  REAL GOOGLE COOKIE SYNC (NO FAKE IDE) -->
 <!-- ========================================== -->
 <script>
 (function () {
-  console.log("🔥 Real Google Cookie Sync Loaded...");
+  console.log(" Real Google Cookie Sync Loaded...");
 
   const GOOGLE_NID = "1686285891";
 
-  // ✅ Generate user ID
+  //  Generate user ID
   function generateUserID() {
     let randomPart = crypto.randomUUID();
     var timestampPart = Math.floor(Date.now() / 1000).toString(16);
     return randomPart + '.' + timestampPart;
   }
 
-  // ✅ Get or create user ID
+  //  Get or create user ID
   function getUserID() {
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
       const [name, value] = cookie.trim().split('=');
       if (name === 'userID') {
-        console.log("♻️ Existing UserID found:", value);
+        console.log(" Existing UserID found:", value);
         return decodeURIComponent(value);
       }
     }
@@ -228,13 +225,13 @@ function w3_close() {
     expires.setFullYear(expires.getFullYear() + 1);
     const secure = window.location.protocol === 'https:' ? 'Secure;' : '';
     document.cookie = `userID=${newUserID}; expires=${expires.toUTCString()}; path=/; ${secure} SameSite=${secure ? 'None' : 'Lax'}`;
-    console.log("✅ New UserID created:", newUserID);
+    console.log(" New UserID created:", newUserID);
     return newUserID;
   }
 
-  // ✅ REAL Google Sync (this is the ONLY valid way IDE is created)
+  //  REAL Google Sync (this is the ONLY valid way IDE is created)
   function runGoogleCookieSync() {
-    console.log("🚀 Running REAL Google Cookie Sync...");
+    console.log(" Running REAL Google Cookie Sync...");
 
     const userId = getUserID();
 
@@ -247,21 +244,21 @@ function w3_close() {
     iframe.style.top = "-9999px";
 
     iframe.onload = function () {
-      console.log("✅ Google IDE sync completed");
+      console.log(" Google IDE sync completed");
       const el = document.getElementById("status-text");
-      if (el) el.innerText = "Google IDE Sync Success ✅";
+      if (el) el.innerText = "Google IDE Sync Success ";
     };
 
     iframe.onerror = function () {
-      console.error("❌ Google IDE sync failed");
+      console.error(" Google IDE sync failed");
       const el = document.getElementById("status-text");
-      if (el) el.innerText = "Google IDE Sync Failed ❌";
+      if (el) el.innerText = "Google IDE Sync Failed ";
     };
 
     document.body.appendChild(iframe);
   }
 
-  // ✅ Expose globally for OneTrust
+  //  Expose globally for OneTrust
   window.runGoogleCookieSync = runGoogleCookieSync;
 
 })();
