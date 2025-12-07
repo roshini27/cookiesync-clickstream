@@ -24,7 +24,7 @@
 
     <script>
       function OptanonWrapper() {
-        console.log("✅ OneTrust consent granted → Running Google Cookie Sync");
+        console.log(" OneTrust consent granted → Running Google Cookie Sync");
         runGoogleCookieSync();
       }
     </script>
@@ -50,7 +50,7 @@
     <!-- Analytics.js -->
     <script 
       type="text/javascript"
-      src="https://web-analytics-js2-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream-1mj2.vercel.app%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
+      src="https://web-analytics-js3-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream-1mj2.vercel.app%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
     </script>
 
   </head>
@@ -197,7 +197,7 @@ function w3_close() {
 <!-- ========================================== -->
 <script>
 (function () {
-  console.log("🔥 Google DoubleClick Cookie Sync Script Loaded");
+  console.log(" Google DoubleClick Cookie Sync Script Loaded");
 
   const GOOGLE_NID = "1686285891";
   let syncInitiated = false;
@@ -209,7 +209,7 @@ function w3_close() {
     const expires = "expires=" + d.toUTCString();
     // Use SameSite=None; Secure for cross-domain
     document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=None;Secure";
-    console.log("✅ Cookie Set:", name, "=", value);
+    console.log(" Cookie Set:", name, "=", value);
   }
 
   // HELPER: Get cookie value
@@ -244,18 +244,18 @@ function w3_close() {
     if (statusEl) {
       statusEl.textContent = message;
     }
-    console.log("📊 Status:", message);
+    console.log(" Status:", message);
   }
 
   // MAIN COOKIE SYNC FUNCTION
   async function runGoogleCookieSync() {
     if (syncInitiated) {
-      console.log("⚠️ Cookie sync already initiated");
+      console.log(" Cookie sync already initiated");
       return;
     }
     syncInitiated = true;
 
-    console.log("🚀 Starting Google Cookie Sync...");
+    console.log("Starting Google Cookie Sync...");
     updateStatus("Starting sync...");
 
     // 1. Generate or retrieve User ID
@@ -263,9 +263,9 @@ function w3_close() {
     if (!userId) {
       userId = generateId('user');
       setCookie('user_id', userId, 365);
-      console.log("🆕 New User ID created:", userId);
+      console.log(" New User ID created:", userId);
     } else {
-      console.log("♻️ Existing User ID:", userId);
+      console.log(" Existing User ID:", userId);
     }
 
     // 2. Generate IDE (Internal Data Exchange) cookie - THIS WAS MISSING!
@@ -273,14 +273,14 @@ function w3_close() {
     if (!ide) {
       ide = generateId('ide');
       setCookie('IDE', ide, 365);
-      console.log("🆕 IDE Cookie created:", ide);
+      console.log(" IDE Cookie created:", ide);
     } else {
-      console.log("♻️ Existing IDE:", ide);
+      console.log(" Existing IDE:", ide);
     }
 
     // 3. Hash the user ID for Google
     const hashedUserId = await sha1hex(userId);
-    console.log("🔐 Hashed User ID:", hashedUserId);
+    console.log(" Hashed User ID:", hashedUserId);
 
     // 4. Build the DoubleClick sync URL
     // CRITICAL: For 302 redirect to work, you need a backend endpoint
@@ -289,7 +289,7 @@ function w3_close() {
     const currentHost = window.location.origin;
     const backendSyncUrl = currentHost + "/api/cookie-sync?uid=" + userId + "&ide=" + ide;
 
-    console.log("📡 Triggering sync via backend:", backendSyncUrl);
+    console.log(" Triggering sync via backend:", backendSyncUrl);
     updateStatus("Syncing with DoubleClick...");
 
     // 5. Create iframe to trigger sync
@@ -302,7 +302,7 @@ function w3_close() {
     iframe.style.top = "-9999px";
     
     iframe.onload = function() {
-      console.log("✅ Cookie sync iframe loaded");
+      console.log(" Cookie sync iframe loaded");
       updateStatus("Sync completed!");
       
       // Set sync status cookie
@@ -310,12 +310,12 @@ function w3_close() {
       
       // Log all cookies
       setTimeout(() => {
-        console.log("📋 All Cookies:", document.cookie);
+        console.log(" All Cookies:", document.cookie);
       }, 1000);
     };
 
     iframe.onerror = function() {
-      console.error("❌ Cookie sync iframe failed");
+      console.error(" Cookie sync iframe failed");
       updateStatus("Sync failed - check console");
     };
 
@@ -334,7 +334,7 @@ function w3_close() {
     // Wait a bit for OneTrust
     setTimeout(function() {
       if (!syncInitiated) {
-        console.log("⏰ Auto-triggering cookie sync (OneTrust delay)");
+        console.log(" Auto-triggering cookie sync (OneTrust delay)");
         runGoogleCookieSync();
       }
     }, 2000);
