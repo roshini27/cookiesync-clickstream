@@ -195,106 +195,83 @@ function w3_close() {
 <!-- ========================================== -->
 <!-- FIXED GOOGLE COOKIE SYNC WITH IDE COOKIE -->
 <!-- ========================================== -->
+<!-- CORRECT - Use this instead -->
 <script>
 (function () {
-  console.log(" Google DoubleClick Cookie Sync Script Loaded");
+  console.log("🔥 Google Cookie Sync Starting...");
 
   const GOOGLE_NID = "1686285891";
-  let syncInitiated = false;
 
-  // HELPER: Set cookie with proper attributes
-  function setCookie(name, value, days) {
-    const d = new Date();
-    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-    const expires = "expires=" + d.toUTCString();
-    // Use SameSite=None; Secure for cross-domain
-    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=None;Secure";
-    console.log(" Cookie Set:", name, "=", value);
+  // Generate IDE cookie
+  function generateIDE() {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 15);
+    return `IDE_${timestamp}_${random}`;
   }
 
-  // HELPER: Get cookie value
-  function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
+  // Set IDE cookie
+  function setIDECookie() {
+    const ide = generateIDE();
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+    const secure = window.location.protocol === 'https:' ? 'Secure;' : '';
+    document.cookie = `IDE=${ide}; expires=${expires.toUTCString()}; path=/; ${secure} SameSite=${secure ? 'None' : 'Lax'}`;
+    console.log("✅ IDE Cookie set:", ide);
+    return ide;
   }
 
-  // HELPER: Generate unique ID
-  function generateId(prefix) {
-    return prefix + "_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+  // Get existing IDE or create new one
+  function getIDECookie() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'IDE') {
+        console.log("♻️ Existing IDE found:", value);
+        return value;
+      }
+    }
+    return setIDECookie();
   }
 
-  // HELPER: SHA-1 hash
-  async function sha1hex(input) {
-    const data = new TextEncoder().encode(input);
-    const hash = await crypto.subtle.digest("SHA-1", data);
-    return [...new Uint8Array(hash)]
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
+  // Generate user ID
+  function generateUserID() {
+    let randomPart = crypto.randomUUID();
+    var timestampPart = Math.floor(Date.now() / 1000).toString(16);
+    return randomPart + '.' + timestampPart;
   }
 
-  // Update status on page
-  function updateStatus(message) {
-    const statusEl = document.getElementById('status-text');
-    if (statusEl) {
-      statusEl.textContent = message;
+  // Get or create user ID
+  function getUserID() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'userID') {
+        console.log("♻️ Existing UserID found:", value);
+        return decodeURIComponent(value);
+      }
     }
-    console.log(" Status:", message);
+    // Create new userID
+    const newUserID = generateUserID();
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+    const secure = window.location.protocol === 'https:' ? 'Secure;' : '';
+    document.cookie = `userID=${newUserID}; expires=${expires.toUTCString()}; path=/; ${secure} SameSite=${secure ? 'None' : 'Lax'}`;
+    console.log("✅ New UserID created:", newUserID);
+    return newUserID;
   }
 
-  // MAIN COOKIE SYNC FUNCTION
-  async function runGoogleCookieSync() {
-    if (syncInitiated) {
-      console.log(" Cookie sync already initiated");
-      return;
-    }
-    syncInitiated = true;
-
-    console.log("Starting Google Cookie Sync...");
-    updateStatus("Starting sync...");
-
-    // 1. Generate or retrieve User ID
-    let userId = getCookie('user_id');
-    if (!userId) {
-      userId = generateId('user');
-      setCookie('user_id', userId, 365);
-      console.log(" New User ID created:", userId);
-    } else {
-      console.log(" Existing User ID:", userId);
-    }
-
-    // 2. Generate IDE (Internal Data Exchange) cookie - THIS WAS MISSING!
-    let ide = getCookie('IDE');
-    if (!ide) {
-      ide = generateId('ide');
-      setCookie('IDE', ide, 365);
-      console.log(" IDE Cookie created:", ide);
-    } else {
-      console.log(" Existing IDE:", ide);
-    }
-
-    // 3. Hash the user ID for Google
-    const hashedUserId = await sha1hex(userId);
-    console.log(" Hashed User ID:", hashedUserId);
-
-    // 4. Build the DoubleClick sync URL
-    // CRITICAL: For 302 redirect to work, you need a backend endpoint
-    // The redirect should come from YOUR server, not directly hitting DoubleClick
+  async function runCookieSync() {
+    console.log("🚀 Starting cookie sync...");
     
-    const currentHost = window.location.origin;
-    const backendSyncUrl = currentHost + "/api/cookie-sync?uid=" + userId + "&ide=" + ide;
+    const userId = getUserID();
+    const ide = getIDECookie();
 
-    console.log(" Triggering sync via backend:", backendSyncUrl);
-    updateStatus("Syncing with DoubleClick...");
+    console.log("User ID:", userId);
+    console.log("IDE:", ide);
 
-    // 5. Create iframe to trigger sync
+    // Create iframe pointing to YOUR GCP backend
     const iframe = document.createElement("iframe");
-    iframe.src = backendSyncUrl;
+    iframe.src = `https://web-analytics-js4-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/cookie-sync?uid=${userId}&ide=${ide}&nid=${GOOGLE_NID}`;
     iframe.width = 1;
     iframe.height = 1;
     iframe.style.display = "none";
@@ -303,41 +280,18 @@ function w3_close() {
     
     iframe.onload = function() {
       console.log(" Cookie sync iframe loaded");
-      updateStatus("Sync completed!");
-      
-      // Set sync status cookie
-      setCookie('sync_status', 'complete', 365);
-      
-      // Log all cookies
-      setTimeout(() => {
-        console.log(" All Cookies:", document.cookie);
-      }, 1000);
     };
 
     iframe.onerror = function() {
       console.error(" Cookie sync iframe failed");
-      updateStatus("Sync failed - check console");
     };
 
     document.body.appendChild(iframe);
-    
-    // Also set a cookie to mark sync attempt
-    setCookie('sync_initiated', new Date().toISOString(), 365);
   }
 
-  // Make function globally accessible for OptanonWrapper
-  window.runGoogleCookieSync = runGoogleCookieSync;
-
-  // Auto-run on page load (fallback if OneTrust doesn't trigger)
-  window.addEventListener("load", function() {
-    updateStatus("Page loaded, waiting for consent...");
-    // Wait a bit for OneTrust
-    setTimeout(function() {
-      if (!syncInitiated) {
-        console.log(" Auto-triggering cookie sync (OneTrust delay)");
-        runGoogleCookieSync();
-      }
-    }, 2000);
+  // Wait for page load then trigger sync
+  window.addEventListener("load", () => {
+    setTimeout(runCookieSync, 1500);
   });
 
 })();
