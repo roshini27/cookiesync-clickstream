@@ -50,7 +50,7 @@
     <!-- Analytics.js -->
     <script 
       type="text/javascript"
-      src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream-1mj2.vercel.app%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
+      src="https://web-analytics-js3-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream-1mj2.vercel.app%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
     </script>
 
   </head>
@@ -198,14 +198,14 @@ function w3_close() {
 <!-- ========================================== -->
 <script>
 (function () {
-  console.log(" Real Google Cookie Sync Loaded...");
+  console.log(" Real Google Cookie Sync Loaded (Direct Pixel)...");
 
   const GOOGLE_NID = "1686285891";
 
   //  Generate user ID
   function generateUserID() {
     let randomPart = crypto.randomUUID();
-    var timestampPart = Math.floor(Date.now() / 1000).toString(16);
+    let timestampPart = Math.floor(Date.now() / 1000).toString(16);
     return randomPart + '.' + timestampPart;
   }
 
@@ -229,40 +229,42 @@ function w3_close() {
     return newUserID;
   }
 
-  //  REAL Google Sync (this is the ONLY valid way IDE is created)
+  //  CORRECT GOOGLE IDE SYNC (DIRECT PIXEL — NO IFRAME)
   function runGoogleCookieSync() {
-    console.log(" Running REAL Google Cookie Sync...");
+    console.log("🚀 Running REAL Google Cookie Sync (Direct Pixel)...");
 
     const userId = getUserID();
 
-    const iframe = document.createElement("iframe");
-    iframe.src = `https://cm.g.doubleclick.net/pixel?google_nid=${GOOGLE_NID}&google_uid=${userId}`;
-    iframe.width = 1;
-    iframe.height = 1;
-    iframe.style.display = "none";
-    iframe.style.position = "absolute";
-    iframe.style.top = "-9999px";
+    const googlePixelUrl =
+      `https://cm.g.doubleclick.net/pixel?` +
+      `google_nid=${GOOGLE_NID}&` +
+      `google_uid=${userId}&` +
+      `google_cm`;
 
-    iframe.onload = function () {
-      console.log(" Google IDE sync completed");
+    console.log(" Firing Google Pixel:", googlePixelUrl);
+
+    const pixel = new Image();
+
+    pixel.onload = function () {
+      console.log("Google IDE Sync SUCCESS");
       const el = document.getElementById("status-text");
       if (el) el.innerText = "Google IDE Sync Success ";
     };
 
-    iframe.onerror = function () {
-      console.error(" Google IDE sync failed");
+    pixel.onerror = function () {
+      console.error(" Google IDE Sync BLOCKED");
       const el = document.getElementById("status-text");
       if (el) el.innerText = "Google IDE Sync Failed ";
     };
 
-    document.body.appendChild(iframe);
+    pixel.src = googlePixelUrl;
   }
 
-  //  Expose globally for OneTrust
   window.runGoogleCookieSync = runGoogleCookieSync;
 
 })();
 </script>
+
 
 
 </body>
