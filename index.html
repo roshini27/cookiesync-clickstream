@@ -4,7 +4,6 @@
     <title>W3.CSS Template</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
@@ -25,7 +24,7 @@
 
     <script>
       function OptanonWrapper() {
-        console.log("OneTrust consent granted → Running Google Cookie Sync");
+        console.log("✅ OneTrust consent granted → Running Google Cookie Sync");
         runGoogleCookieSync();
       }
     </script>
@@ -76,12 +75,10 @@
   <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
     <a href="#" class="w3-bar-item w3-button">Shirts</a>
     <a href="#" class="w3-bar-item w3-button">Dresses</a>
-
     <a onclick="myAccFunc()" href="javascript:void(0)"
        class="w3-button w3-block w3-white w3-left-align" id="myBtn">
       Jeans <i class="fa fa-caret-down"></i>
     </a>
-
     <div id="demoAcc" class="w3-bar-block w3-hide w3-padding-large w3-medium">
       <a href="#" class="w3-bar-item w3-button w3-light-grey">
         <i class="fa fa-caret-right w3-margin-right"></i>Skinny
@@ -90,7 +87,6 @@
       <a href="#" class="w3-bar-item w3-button">Bootcut</a>
       <a href="#" class="w3-bar-item w3-button">Straight</a>
     </div>
-
     <a href="#" class="w3-bar-item w3-button">Jackets</a>
     <a href="#" class="w3-bar-item w3-button">Gymwear</a>
     <a href="#" class="w3-bar-item w3-button">Blazers</a>
@@ -102,10 +98,8 @@
      onclick="document.getElementById('newsletter').style.display='block'">
      Newsletter
   </a>
-
   <a href="#footer" class="w3-bar-item w3-button w3-padding">Subscribe</a>
 </nav>
-
 
 <header class="w3-bar w3-top w3-hide-large w3-black w3-xlarge">
   <div class="w3-bar-item w3-padding-24 w3-wide">LOGO</div>
@@ -118,9 +112,7 @@
 
 <div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" id="myOverlay"></div>
 
-
 <div class="w3-main" style="margin-left:250px">
-
   <div class="w3-hide-large" style="margin-top:83px"></div>
 
   <header class="w3-container w3-xlarge">
@@ -132,31 +124,22 @@
   </header>
 
   <div class="w3-display-container w3-container">
-    <img src="https://www.w3schools.com/w3images/jeans.jpg"
-         alt="Jeans" style="width:100%">
-
-    <div class="w3-display-topleft w3-text-white"
-         style="padding:24px 48px">
-
+    <img src="https://www.w3schools.com/w3images/jeans.jpg" alt="Jeans" style="width:100%">
+    <div class="w3-display-topleft w3-text-white" style="padding:24px 48px">
       <h1 class="w3-jumbo w3-hide-small">New arrivals</h1>
       <h1 class="w3-hide-large w3-hide-medium">New arrivals</h1>
       <h1 class="w3-hide-small">COLLECTION 2016</h1>
-
       <p>
-        <a href="#jeans" id="shopnow"
-           class="w3-button w3-black w3-padding-large w3-large">
+        <a href="#jeans" id="shopnow" class="w3-button w3-black w3-padding-large w3-large">
            SHOP NOW
         </a>
       </p>
-
     </div>
   </div>
 
   <div class="w3-container w3-text-grey" id="jeans">
     <p>8 items</p>
   </div>
-
-  <!-- Product grid stays unchanged -->
 
   <!-- Subscribe section -->
   <div class="w3-container w3-black w3-padding-32">
@@ -169,10 +152,12 @@
   <!-- Footer -->
   <footer class="w3-padding-64 w3-light-grey w3-small w3-center" id="footer">
     <button id="ot-sdk-btn" class="ot-sdk-show-settings">Cookie Settings</button>
+    <div id="sync-status" style="margin-top:20px; padding:10px; background:#f0f0f0; border-radius:5px;">
+      <strong>Cookie Sync Status:</strong> <span id="status-text">Initializing...</span>
+    </div>
   </footer>
 
 </div>
-
 
 <!-- Newsletter Modal -->
 <div id="newsletter" class="w3-modal">
@@ -207,15 +192,44 @@ function w3_close() {
 }
 </script>
 
-
-
-<!-- GOOGLE COOKIE SYNC (Final + Stable Version) -->
+<!-- ========================================== -->
+<!-- FIXED GOOGLE COOKIE SYNC WITH IDE COOKIE -->
+<!-- ========================================== -->
 <script>
 (function () {
-  console.log("🔥 Google DoubleClick Cookie Sync Starting…");
+  console.log("🔥 Google DoubleClick Cookie Sync Script Loaded");
 
-  const GOOGLE_NID = "1686285891"; // your ad network ID (NO hyphens)
+  const GOOGLE_NID = "1686285891";
+  let syncInitiated = false;
 
+  // HELPER: Set cookie with proper attributes
+  function setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + d.toUTCString();
+    // Use SameSite=None; Secure for cross-domain
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=None;Secure";
+    console.log("✅ Cookie Set:", name, "=", value);
+  }
+
+  // HELPER: Get cookie value
+  function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  // HELPER: Generate unique ID
+  function generateId(prefix) {
+    return prefix + "_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+  }
+
+  // HELPER: SHA-1 hash
   async function sha1hex(input) {
     const data = new TextEncoder().encode(input);
     const hash = await crypto.subtle.digest("SHA-1", data);
@@ -224,39 +238,110 @@ function w3_close() {
       .join("");
   }
 
-  async function runCookieSync() {
-    const randomUser = crypto.randomUUID();  
-    const hashed = await sha1hex(randomUser);
+  // Update status on page
+  function updateStatus(message) {
+    const statusEl = document.getElementById('status-text');
+    if (statusEl) {
+      statusEl.textContent = message;
+    }
+    console.log("📊 Status:", message);
+  }
 
-    // MUST END WITH A REDIRECT → causes 302
-    const redirectUrl = encodeURIComponent("https://cookiesync-clickstream.vercel.app/sync_done");
+  // MAIN COOKIE SYNC FUNCTION
+  async function runGoogleCookieSync() {
+    if (syncInitiated) {
+      console.log("⚠️ Cookie sync already initiated");
+      return;
+    }
+    syncInitiated = true;
 
-    const syncUrl =
-      "https://cm.g.doubleclick.net/pixel?" +
-      "google_nid=" + GOOGLE_NID +
-      "&google_cm=1" +                 // MUST for DoubleClick sync
-      "&google_hm=" + hashed +         // hashed user ID
-      "&tag_debug=1" +                 // show 302 chain
-      "&redirect=" + redirectUrl;      // force 302
+    console.log("🚀 Starting Google Cookie Sync...");
+    updateStatus("Starting sync...");
 
-    console.log("📡 Sending Google Sync →", syncUrl);
+    // 1. Generate or retrieve User ID
+    let userId = getCookie('user_id');
+    if (!userId) {
+      userId = generateId('user');
+      setCookie('user_id', userId, 365);
+      console.log("🆕 New User ID created:", userId);
+    } else {
+      console.log("♻️ Existing User ID:", userId);
+    }
 
-    // Use iframe → real 302 visible in Network
+    // 2. Generate IDE (Internal Data Exchange) cookie - THIS WAS MISSING!
+    let ide = getCookie('IDE');
+    if (!ide) {
+      ide = generateId('ide');
+      setCookie('IDE', ide, 365);
+      console.log("🆕 IDE Cookie created:", ide);
+    } else {
+      console.log("♻️ Existing IDE:", ide);
+    }
+
+    // 3. Hash the user ID for Google
+    const hashedUserId = await sha1hex(userId);
+    console.log("🔐 Hashed User ID:", hashedUserId);
+
+    // 4. Build the DoubleClick sync URL
+    // CRITICAL: For 302 redirect to work, you need a backend endpoint
+    // The redirect should come from YOUR server, not directly hitting DoubleClick
+    
+    const currentHost = window.location.origin;
+    const backendSyncUrl = currentHost + "/api/cookie-sync?uid=" + userId + "&ide=" + ide;
+
+    console.log("📡 Triggering sync via backend:", backendSyncUrl);
+    updateStatus("Syncing with DoubleClick...");
+
+    // 5. Create iframe to trigger sync
     const iframe = document.createElement("iframe");
-    iframe.src = syncUrl;
+    iframe.src = backendSyncUrl;
     iframe.width = 1;
     iframe.height = 1;
     iframe.style.display = "none";
-    iframe.allow = "partitioned-cookies";  // required for CHIPS 
+    iframe.style.position = "absolute";
+    iframe.style.top = "-9999px";
+    
+    iframe.onload = function() {
+      console.log("✅ Cookie sync iframe loaded");
+      updateStatus("Sync completed!");
+      
+      // Set sync status cookie
+      setCookie('sync_status', 'complete', 365);
+      
+      // Log all cookies
+      setTimeout(() => {
+        console.log("📋 All Cookies:", document.cookie);
+      }, 1000);
+    };
+
+    iframe.onerror = function() {
+      console.error("❌ Cookie sync iframe failed");
+      updateStatus("Sync failed - check console");
+    };
+
     document.body.appendChild(iframe);
+    
+    // Also set a cookie to mark sync attempt
+    setCookie('sync_initiated', new Date().toISOString(), 365);
   }
 
-  // Delay a bit (OneTrust sometimes loads late)
-  window.addEventListener("load", () => setTimeout(runCookieSync, 1500));
+  // Make function globally accessible for OptanonWrapper
+  window.runGoogleCookieSync = runGoogleCookieSync;
+
+  // Auto-run on page load (fallback if OneTrust doesn't trigger)
+  window.addEventListener("load", function() {
+    updateStatus("Page loaded, waiting for consent...");
+    // Wait a bit for OneTrust
+    setTimeout(function() {
+      if (!syncInitiated) {
+        console.log("⏰ Auto-triggering cookie sync (OneTrust delay)");
+        runGoogleCookieSync();
+      }
+    }, 2000);
+  });
 
 })();
 </script>
-
 
 </body>
 </html>
