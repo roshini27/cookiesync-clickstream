@@ -197,73 +197,41 @@ function w3_close() {
 <!--  REAL GOOGLE COOKIE SYNC (NO FAKE IDE) -->
 <!-- ========================================== -->
 <script>
-(function () {
-  console.log(" Real Google Cookie Sync Loaded (Direct Pixel)...");
+const GOOGLE_NID = "1686285891";
 
-  const GOOGLE_NID = "1686285891";
+async function sha1(message) {
+  const data = new TextEncoder().encode(message);
+  const hash = await crypto.subtle.digest("SHA-1", data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
-  //  Generate user ID
-  function generateUserID() {
-    let randomPart = crypto.randomUUID();
-    let timestampPart = Math.floor(Date.now() / 1000).toString(16);
-    return randomPart + '.' + timestampPart;
-  }
+(async () => {
+  const uid = "user_" + Math.random().toString(36).substring(2);
+  const hashed = await sha1(uid);
 
-  //  Get or create user ID
-  function getUserID() {
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'userID') {
-        console.log(" Existing UserID found:", value);
-        return decodeURIComponent(value);
-      }
-    }
+  const redirect = encodeURIComponent(location.href);
 
-    const newUserID = generateUserID();
-    const expires = new Date();
-    expires.setFullYear(expires.getFullYear() + 1);
-    const secure = window.location.protocol === 'https:' ? 'Secure;' : '';
-    document.cookie = `userID=${newUserID}; expires=${expires.toUTCString()}; path=/; ${secure} SameSite=${secure ? 'None' : 'Lax'}`;
-    console.log(" New UserID created:", newUserID);
-    return newUserID;
-  }
+  const pixelUrl =
+    "https://cm.g.doubleclick.net/pixel?" +
+    "google_nid=" + GOOGLE_NID +
+    "&google_hm=" + hashed +
+    "&redirect=" + redirect +
+    "&tag_debug=1";
 
-  //  CORRECT GOOGLE IDE SYNC (DIRECT PIXEL — NO IFRAME)
-  function runGoogleCookieSync() {
-    console.log("🚀 Running REAL Google Cookie Sync (Direct Pixel)...");
+  console.log("FORCING IDE SYNC:", pixelUrl);
 
-    const userId = getUserID();
+  const iframe = document.createElement("iframe");
+  iframe.src = pixelUrl;
+  iframe.style.display = "none";
+  iframe.width = 0;
+  iframe.height = 0;
 
-    const googlePixelUrl =
-      `https://cm.g.doubleclick.net/pixel?` +
-      `google_nid=${GOOGLE_NID}&` +
-      `google_uid=${userId}&` +
-      `google_cm`;
-
-    console.log(" Firing Google Pixel:", googlePixelUrl);
-
-    const pixel = new Image();
-
-    pixel.onload = function () {
-      console.log("Google IDE Sync SUCCESS");
-      const el = document.getElementById("status-text");
-      if (el) el.innerText = "Google IDE Sync Success ";
-    };
-
-    pixel.onerror = function () {
-      console.error(" Google IDE Sync BLOCKED");
-      const el = document.getElementById("status-text");
-      if (el) el.innerText = "Google IDE Sync Failed ";
-    };
-
-    pixel.src = googlePixelUrl;
-  }
-
-  window.runGoogleCookieSync = runGoogleCookieSync;
-
+  document.body.appendChild(iframe);
 })();
 </script>
+
 
 
 
