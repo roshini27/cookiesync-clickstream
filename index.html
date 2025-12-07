@@ -1,59 +1,83 @@
  <!DOCTYPE html>
 <html>
-  <head>
-    <title>W3.CSS Template</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+ <head>
+  <title>W3.CSS Template</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-      .w3-sidebar a { font-family: "Roboto", sans-serif }
-      body,h1,h2,h3,h4,h5,h6,.w3-wide { font-family: "Montserrat", sans-serif }
-    </style>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <!-- CMP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
-    <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
-      type="text/javascript"
-      charset="UTF-8"
-      data-domain-script="0195138c-cdc8-738c-907d-131dad8db9ba-test">
-    </script>
+  <style>
+    .w3-sidebar a { font-family: "Roboto", sans-serif }
+    body,h1,h2,h3,h4,h5,h6,.w3-wide { font-family: "Montserrat", sans-serif }
+  </style>
 
-    <script>
-      function OptanonWrapper() {
-        console.log(" OneTrust consent granted → Running Google Cookie Sync");
+  <!-- ✅ CMP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+  <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+    type="text/javascript"
+    charset="UTF-8"
+    data-domain-script="0195138c-cdc8-738c-907d-131dad8db9ba-test">
+  </script>
+
+  <script>
+    function OptanonWrapper() {
+      console.log("✅ OneTrust consent granted → Running Google Cookie Sync");
+      if (window.runGoogleCookieSync) {
         runGoogleCookieSync();
       }
-    </script>
+    }
+  </script>
 
-    <!-- Adobe Launch -->
-    <script src="https://assets.adobedtm.com/e72b4113c11a/dea835227b36/launch-5cc6da518e0d-development.min.js" async></script>
+  <!-- ✅ ADOBE -->
+  <script src="https://assets.adobedtm.com/e72b4113c11a/dea835227b36/launch-5cc6da518e0d-development.min.js" async></script>
 
-    <!-- Data Layer -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      dataLayer.push({
-        pageEnvironment: 'testPageEnvironment',
-        pageContentType: 'pageContentType',
-        pageName: 'Homepage',
-        loggedIn: 'loggedIn',
-        consentVersion: 'consentVersion',
-        type: 'type',
-        segment: 'segment',
-        customerId:'customerId123'
-      });
-    </script>
+  <!-- ✅ DATALAYER -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    dataLayer.push({
+      pageEnvironment: 'testPageEnvironment',
+      pageContentType: 'pageContentType',
+      pageName: 'Homepage',
+      loggedIn: 'loggedIn',
+      consentVersion: 'consentVersion',
+      type: 'type',
+      segment: 'segment',
+      customerId:'customerId123'
+    });
+  </script>
 
-    <!-- Analytics.js -->
-    <script 
-      type="text/javascript"
-      src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream-1mj2.vercel.app%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
-    </script>
+  <!-- ✅ META PIXEL (MUST BE HERE ✅) -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
 
-  </head>
+  fbq('init', '101937259');
+  fbq('track', 'PageView');
+  </script>
+
+  <noscript>
+    <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=101937259&ev=PageView&noscript=1"/>
+  </noscript>
+
+  <!-- ✅ ANALYTICS.JS (LAST IN HEAD ✅) -->
+  <script 
+    type="text/javascript"
+    src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream-1mj2.vercel.app%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
+  </script>
+</head>
+
 
 <body class="w3-content" style="max-width:1200px">
 
