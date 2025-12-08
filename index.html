@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Cookie Sync Demo</title>
+  <title>Cookie Sync + Meta Test</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Styles -->
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <style>
-    .w3-sidebar a { font-family: "Roboto", sans-serif }
-    body,h1,h2,h3,h4,h5,h6,.w3-wide { font-family: "Montserrat", sans-serif }
+    body,h1,h2,h3,h4,h5,h6,.w3-wide {
+      font-family: "Montserrat", sans-serif
+    }
   </style>
 
   <!-- ✅ CMP -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
   <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
     type="text/javascript"
     charset="UTF-8"
@@ -26,112 +24,104 @@
 
   <script>
     function OptanonWrapper() {
-      console.log("✅ OneTrust consent granted");
+      console.log("✅ OneTrust Consent Granted");
+      if (window.runGoogleCookieSync) {
+        runGoogleCookieSync();
+      }
     }
   </script>
 
-  <!-- ✅ META PIXEL (MUST LOAD BEFORE ANALYTICS ✅) -->
-  <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
+  <!-- ✅ ADOBE -->
+  <script src="https://assets.adobedtm.com/e72b4113c11a/dea835227b36/launch-5cc6da518e0d-development.min.js" async></script>
 
-    fbq('init', '101937259');
-    fbq('track', 'PageView');
-
-    console.log("✅ Meta Pixel Loaded:", typeof fbq);
-  </script>
-
-  <noscript>
-    <img height="1" width="1" style="display:none"
-      src="https://www.facebook.com/tr?id=101937259&ev=PageView&noscript=1"/>
-  </noscript>
-
-  <!-- ✅ DATALAYER -->
+  <!-- ✅ DATA LAYER -->
   <script>
     window.dataLayer = window.dataLayer || [];
     dataLayer.push({
-      pageEnvironment: 'testPageEnvironment',
-      pageContentType: 'pageContentType',
       pageName: 'Homepage',
-      loggedIn: 'loggedIn',
-      consentVersion: 'consentVersion',
-      type: 'type',
-      segment: 'segment',
-      customerId:'customerId123'
+      customerId: 'customerId123'
     });
   </script>
-
-  <!-- ✅ ANALYTICS.JS (LAST IN HEAD ✅) -->
-  <script 
-    src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js">
-  </script>
-
 </head>
-
-
 
 <body class="w3-content" style="max-width:1200px">
 
-  <div class="w3-container">
-    <h2>✅ Cookie Sync Test Page</h2>
-    <p>Open DevTools → Console + Application → Cookies</p>
-  </div>
+<!-- ✅✅✅ META PIXEL – FORCED LOAD (FIXES fbq UNDEFINED) -->
+<script>
+(function() {
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://connect.facebook.net/en_US/fbevents.js";
+  s.onload = function() {
+    console.log("✅ META SCRIPT LOADED");
+    fbq('init', '101937259');
+    fbq('track', 'PageView');
+    console.log("✅ fbq initialized");
+  };
+  document.head.appendChild(s);
+})();
+</script>
 
-  <!-- ================================ -->
-  <!-- ✅ REAL GOOGLE COOKIE SYNC -->
-  <!-- ================================ -->
-  <script>
-    const GOOGLE_NID = "1686285891";
+<noscript>
+  <img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=101937259&ev=PageView&noscript=1"/>
+</noscript>
 
-    async function sha1(message) {
-      const data = new TextEncoder().encode(message);
-      const hash = await crypto.subtle.digest("SHA-1", data);
-      return Array.from(new Uint8Array(hash))
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
-    }
+<!-- ✅ ANALYTICS.JS (AFTER META ✅) -->
+<script 
+  type="text/javascript"
+  src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22soundandsilence.in%22,%22www.soundandsilence.in%22,%22cookiesync-clickstream.vercel.app%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com">
+</script>
 
-    (async () => {
-      const uid = "user_" + Math.random().toString(36).substring(2);
-      const hashed = await sha1(uid);
-      const redirect = encodeURIComponent(location.href);
+<!-- ✅ PAGE UI -->
+<div class="w3-container w3-center w3-padding-32">
+  <h1>✅ Cookie Sync + Meta Test Page</h1>
+  <p>Check DevTools → Network → facebook / tr</p>
+  <p>Console should show:</p>
+  <pre>
+✅ META SCRIPT LOADED
+✅ fbq initialized
+  </pre>
+</div>
 
-      const pixelUrl =
-        "https://cm.g.doubleclick.net/pixel?" +
-        "google_nid=" + GOOGLE_NID +
-        "&google_hm=" + hashed +
-        "&redirect=" + redirect +
-        "&tag_debug=1";
+<!-- ========================================== -->
+<!-- ✅✅✅ REAL GOOGLE COOKIE SYNC -->
+<!-- ========================================== -->
+<script>
+const GOOGLE_NID = "1686285891";
 
-      console.log("✅ FORCING GOOGLE IDE SYNC:", pixelUrl);
+async function sha1(message) {
+  const data = new TextEncoder().encode(message);
+  const hash = await crypto.subtle.digest("SHA-1", data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
-      const iframe = document.createElement("iframe");
-      iframe.src = pixelUrl;
-      iframe.style.display = "none";
-      iframe.width = 0;
-      iframe.height = 0;
+(async () => {
+  const uid = "user_" + Math.random().toString(36).substring(2);
+  const hashed = await sha1(uid);
 
-      document.body.appendChild(iframe);
-    })();
-  </script>
+  const redirect = encodeURIComponent(location.href);
 
-  <!-- ================================ -->
-  <!-- ✅ DEBUG PANEL -->
-  <!-- ================================ -->
-  <script>
-    setTimeout(() => {
-      console.log("✅ fbq type:", typeof fbq);
-      console.log("✅ document.cookie:", document.cookie);
-      console.log("✅ _fbp exists:", document.cookie.includes("_fbp"));
-    }, 3000);
-  </script>
+  const pixelUrl =
+    "https://cm.g.doubleclick.net/pixel?" +
+    "google_nid=" + GOOGLE_NID +
+    "&google_hm=" + hashed +
+    "&redirect=" + redirect +
+    "&tag_debug=1";
+
+  console.log("✅ FIRING GOOGLE SYNC:", pixelUrl);
+
+  const iframe = document.createElement("iframe");
+  iframe.src = pixelUrl;
+  iframe.style.display = "none";
+  iframe.width = 0;
+  iframe.height = 0;
+
+  document.body.appendChild(iframe);
+})();
+</script>
 
 </body>
 </html>
