@@ -16,14 +16,22 @@ body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
 </style>
 
 <!-- OneTrust Cookies Consent Notice -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
 <script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" 
   type="text/javascript" 
   charset="UTF-8" 
   data-domain-script="0195138c-cdc8-738c-907d-131dad8db9ba-test">
 </script>
+
 <script type="text/javascript">
-function OptanonWrapper() { }
+function OptanonWrapper() {
+  console.log("✅ Cookie Sync Started After Consent");
+
+  var script = document.createElement("script");
+  script.src = "https://web-analytics-js2-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=false&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com";
+
+  script.async = true;
+  document.head.appendChild(script);
+}
 </script>
 
 <!-- Data Layer -->
@@ -49,10 +57,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-NPRLPX6Q');</script>
 
 <!--  ANALYTICS SCRIPT - ONLY LOAD ONCE WITH googleCookieSyncFlag=true -->
-<script type="text/javascript" src="https://web-analytics-js2-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
 
 </head>
-
 <body class="w3-content" style="max-width:1200px">
 
 <!-- Google Tag Manager (noscript) -->
