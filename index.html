@@ -92,15 +92,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             let foundAny = false;
             Object.keys(gclCookies).forEach(key => {
                 if (gclCookies[key]) {
-                    console.log(`✅ Found ${key}:`, gclCookies[key]);
+                    console.log(` Found ${key}:`, gclCookies[key]);
                     foundAny = true;
                 } else {
-                    console.log(`❌ Not found: ${key}`);
+                    console.log(` Not found: ${key}`);
                 }
             });
             
             if (!foundAny) {
-                console.log('ℹ️ No GCL cookies found. These are set when users click Google Ads.');
+                console.log(' No GCL cookies found. These are set when users click Google Ads.');
             }
             
             return gclCookies;
@@ -111,25 +111,121 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     }
 
+    /**
+     * NEW: Get User ID from _ga cookie or custom cookie
+     * This is YOUR neutral first-party user ID
+     */
+    function getUserId() {
+        try {
+            // Try to get Google Analytics _ga cookie first
+            const gaCookie = document.cookie.split('; ').find(row => row.startsWith('_ga='));
+            if (gaCookie) {
+                const gaValue = gaCookie.split('=')[1];
+                console.log(' Found User ID from _ga:', gaValue);
+                return gaValue;
+            }
+            
+            // Or get from your custom cookie (replace 'user_id' with your cookie name)
+            const customCookie = document.cookie.split('; ').find(row => row.startsWith('user_id='));
+            if (customCookie) {
+                const userId = customCookie.split('=')[1];
+                console.log(' Found User ID from custom cookie:', userId);
+                return userId;
+            }
+            
+            console.log(' No user ID cookie found');
+            return null;
+            
+        } catch (e) {
+            console.error('Error reading user ID:', e);
+            return null;
+        }
+    }
+
+    /**
+     * NEW: Send User Identity to Google Ads
+     * This creates the mapping: Your User ID ↔ Google Click ID
+     */
+    function sendUserIdentityToGoogle() {
+        try {
+            const userId = getUserId();
+            const gclCookies = getGCLCookies();
+            
+            // Only proceed if we have user ID and GCL cookies
+            if (!userId || !gclCookies.gcl_aw) {
+                console.log('ℹ️ Skipping user identity sync (missing user ID or GCL cookie)');
+                return;
+            }
+            
+            console.log('🔗 Creating user identity mapping...');
+            console.log('   Your User ID:', userId);
+            console.log('   Google Click ID:', gclCookies.gcl_aw);
+            
+            // Send to Google via dataLayer (requires GTM/gtag.js)
+            if (window.dataLayer) {
+                window.dataLayer.push({
+                    'event': 'user_identity_sync',
+                    'user_id': userId,
+                    'gclid': gclCookies.gcl_aw
+                });
+                console.log(' User identity pushed to dataLayer for Google');
+            }
+            
+            // Optional: Send to your backend for server-side tracking
+            // This is recommended for enhanced privacy and accuracy
+            if (typeof fetch !== 'undefined') {
+                // Uncomment to enable backend sync:
+                /*
+                fetch('/api/user-identity-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userId,
+                        gclid: gclCookies.gcl_aw,
+                        gcl_au: gclCookies.gcl_au,
+                        timestamp: new Date().toISOString()
+                    })
+                }).then(() => {
+                    console.log(' User identity sent to backend');
+                }).catch(err => {
+                    console.error(' Failed to send identity to backend:', err);
+                });
+                */
+                console.log(' Tip: Enable backend sync by uncommenting the fetch code');
+            }
+            
+        } catch (e) {
+            console.error('Error sending user identity to Google:', e);
+        }
+    }
+
     function initializeCookieSync() {
         if (!COOKIE_SYNC_CONFIG.enabled) {
             console.log('Cookie sync is disabled');
             return;
         }
 
-        console.log('Initializing cookie sync...');
+        // Prevent duplicate initialization
+        if (window.cookieSyncInitialized) {
+            console.log('Cookie sync already initialized, skipping');
+            return;
+        }
+        window.cookieSyncInitialized = true;
+
+        console.log('=== Initializing Cookie Sync (After Consent) ===');
         
-        // NEW: Check for GCL cookies first
+        // Step 1: Check for GCL cookies
         const gclCookies = getGCLCookies();
         
-        // Method 1: Cookie Match via Image Pixel
+        // Step 2: Perform cookie sync with DoubleClick
         performCookieMatchSync();
-        
-        // Method 2: GPT-based Cookie Sync
         performGPTCookieSync();
-        
-        // Method 3: Direct iframe sync
         performIframeCookieSync();
+        
+        // Step 3: Send user identity to Google (maps your User ID ↔ Google Click ID)
+        sendUserIdentityToGoogle();
+        
+        console.log('=== Cookie Sync Complete ===');
     }
 
     function performCookieMatchSync() {
@@ -143,11 +239,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             img.height = 1;
             
             img.onload = function() {
-                console.log('Cookie match sync successful');
+                console.log(' Cookie match sync successful');
             };
             
             img.onerror = function() {
-                console.warn('Cookie match sync failed - this may be due to browser privacy settings');
+                console.warn(' Cookie match sync blocked by browser (this is normal with privacy features enabled)');
             };
             
             img.src = syncUrl;
@@ -165,6 +261,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             
             googletag.cmd.push(function() {
                 try {
+                    // Check if slot already exists before creating
+                    const existingSlots = googletag.pubads().getSlots();
+                    const slotExists = existingSlots.some(function(s) {
+                        return s.getSlotElementId() === 'gpt-cookie-sync-div';
+                    });
+                    
+                    if (slotExists) {
+                        console.log('GPT cookie sync slot already exists, skipping');
+                        return;
+                    }
+                    
                     // Create a 1x1 ad slot for cookie syncing
                     const slot = googletag.defineSlot(testAdUnit, [1, 1], 'gpt-cookie-sync-div');
                     
@@ -173,11 +280,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         
                         googletag.pubads().addEventListener('slotRenderEnded', function(event) {
                             if (event.slot === slot) {
-                                console.log('GPT cookie sync completed');
-                                // Clean up after sync
-                                setTimeout(function() {
-                                    googletag.destroySlots([slot]);
-                                }, 2000);
+                                console.log(' GPT cookie sync completed');
                             }
                         });
 
@@ -185,7 +288,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         googletag.display(slot);
                     }
                 } catch (error) {
-                    console.error('GPT cookie sync error:', error);
+                    console.warn(' GPT cookie sync skipped (this is normal if Network ID is not configured in Ad Manager):', error.message);
                 }
             });
         } catch (error) {
@@ -207,7 +310,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             iframe.style.left = '-9999px';
             
             iframe.onload = function() {
-                console.log('Iframe cookie sync loaded');
+                console.log(' Iframe cookie sync loaded');
                 // Remove iframe after sync
                 setTimeout(function() {
                     if (iframe.parentNode) {
@@ -217,7 +320,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             };
             
             iframe.onerror = function() {
-                console.warn('Iframe cookie sync failed');
+                console.warn(' Iframe cookie sync blocked by browser');
                 if (iframe.parentNode) {
                     iframe.parentNode.removeChild(iframe);
                 }
