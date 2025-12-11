@@ -60,6 +60,57 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         enabled: true
     };
 
+    /**
+     * NEW: Capture GCL (Google Click ID) Cookies
+     * This function reads all Google Ads click tracking cookies
+     */
+    function getGCLCookies() {
+        const gclCookies = {
+            gcl_aw: null,  // Google Ads GCLID
+            gcl_dc: null,  // DoubleClick DCLID
+            gcl_gb: null,  // Google Ads conversion
+            gcl_gf: null,  // Google Ads floodlight
+            gcl_au: null   // Google Analytics auto-generated
+        };
+        
+        try {
+            const cookies = document.cookie.split('; ');
+            
+            cookies.forEach(cookie => {
+                const [name, value] = cookie.split('=');
+                
+                // Check for each GCL cookie type
+                if (name === '_gcl_aw') gclCookies.gcl_aw = value;
+                if (name === '_gcl_dc') gclCookies.gcl_dc = value;
+                if (name === '_gcl_gb') gclCookies.gcl_gb = value;
+                if (name === '_gcl_gf') gclCookies.gcl_gf = value;
+                if (name === '_gcl_au') gclCookies.gcl_au = value;
+            });
+            
+            // Log found GCL cookies
+            console.log('=== GCL Cookies Check ===');
+            let foundAny = false;
+            Object.keys(gclCookies).forEach(key => {
+                if (gclCookies[key]) {
+                    console.log(`✅ Found ${key}:`, gclCookies[key]);
+                    foundAny = true;
+                } else {
+                    console.log(`❌ Not found: ${key}`);
+                }
+            });
+            
+            if (!foundAny) {
+                console.log('ℹ️ No GCL cookies found. These are set when users click Google Ads.');
+            }
+            
+            return gclCookies;
+            
+        } catch (e) {
+            console.error('[GCL] Error reading GCL cookies:', e);
+            return gclCookies;
+        }
+    }
+
     function initializeCookieSync() {
         if (!COOKIE_SYNC_CONFIG.enabled) {
             console.log('Cookie sync is disabled');
@@ -67,6 +118,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
 
         console.log('Initializing cookie sync...');
+        
+        // NEW: Check for GCL cookies first
+        const gclCookies = getGCLCookies();
         
         // Method 1: Cookie Match via Image Pixel
         performCookieMatchSync();
