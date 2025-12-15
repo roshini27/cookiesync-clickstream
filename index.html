@@ -47,8 +47,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-NPRLPX6Q');</script>
 <!-- End Google Tag Manager -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17484083586"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+</script>
  
 <script type="text/javascript" src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
+
+
 
 <!-- Cookie Sync Implementation -->
 <script type="text/javascript">
@@ -116,31 +125,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      * This is YOUR neutral first-party user ID
      */
     function getUserId() {
-        try {
-            // Try to get Google Analytics _ga cookie first
-            const gaCookie = document.cookie.split('; ').find(row => row.startsWith('_ga='));
-            if (gaCookie) {
-                const gaValue = gaCookie.split('=')[1];
-                console.log(' Found User ID from _ga:', gaValue);
-                return gaValue;
-            }
-            
-            // Or get from your custom cookie (replace 'user_id' with your cookie name)
-            const customCookie = document.cookie.split('; ').find(row => row.startsWith('user_id='));
-            if (customCookie) {
-                const userId = customCookie.split('=')[1];
-                console.log(' Found User ID from custom cookie:', userId);
-                return userId;
-            }
-            
-            console.log(' No user ID cookie found');
-            return null;
-            
-        } catch (e) {
-            console.error('Error reading user ID:', e);
+    try {
+        const cookie = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('userID='));
+
+        if (!cookie) {
+            console.log('[UserID] userID cookie not found');
             return null;
         }
+
+        const value = cookie.split('=').slice(1).join('=');
+        console.log('[UserID] Found userID:', value);
+        return value;
+    } catch (e) {
+        console.error('[UserID] Error reading userID cookie:', e);
+        return null;
     }
+}
+
 
     /**
      * NEW: Send User Identity to Google Ads
@@ -152,8 +155,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             const gclCookies = getGCLCookies();
             
             // Only proceed if we have user ID and GCL cookies
-            if (!userId || !gclCookies.gcl_aw) {
-                console.log('ℹ️ Skipping user identity sync (missing user ID or GCL cookie)');
+            if (!userId) {
+                console.log('Skipping identity sync (no userID)');
                 return;
             }
             
@@ -223,7 +226,26 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         performIframeCookieSync();
         
         // Step 3: Send user identity to Google (maps your User ID ↔ Google Click ID)
-        sendUserIdentityToGoogle();
+                // === Google Ads Remarketing (Audience Growth) ===
+        try {
+            const userId = getUserId(); // reads userID cookie
+        
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){ dataLayer.push(arguments); }
+        
+            // Load Google Ads tag once
+        
+            // Fire remarketing hit (THIS grows the audience)
+            gtag('js', new Date());
+            gtag('config', 'AW-17484083586', {
+                user_id: userId || undefined
+            });
+        
+            console.log('[Google Ads] Remarketing tag fired', userId);
+        } catch (e) {
+            console.error('[Google Ads] Remarketing failed', e);
+        }
+
         
         console.log('=== Cookie Sync Complete ===');
     }
