@@ -383,21 +383,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h3 class="w3-wide"><b>LOGO</b></h3>
 </div>
 <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
-<a href="#" class="w3-bar-item w3-button">Shirts</a>
-<a href="#" class="w3-bar-item w3-button">Dresses</a>
+<a href="category.html?category=shirts" class="w3-bar-item w3-button">Shirts</a>
+<a href="category.html?category=dresses" class="w3-bar-item w3-button">Dresses</a>
 <a onclick="myAccFunc()" href="javascript:void(0)" class="w3-button w3-block w3-white w3-left-align" id="myBtn">
       Jeans <i class="fa fa-caret-down"></i>
 </a>
 <div id="demoAcc" class="w3-bar-block w3-hide w3-padding-large w3-medium">
 <a href="#" class="w3-bar-item w3-button w3-light-grey"><i class="fa fa-caret-right w3-margin-right"></i>Skinny</a>
-<a href="#" class="w3-bar-item w3-button">Relaxed</a>
-<a href="#" class="w3-bar-item w3-button">Bootcut</a>
-<a href="#" class="w3-bar-item w3-button">Straight</a>
+<a href="category.html?category=jeans&type=relaxed" class="w3-bar-item w3-button">Relaxed</a>
+<a href="category.html?category=jeans&type=bootcut" class="w3-bar-item w3-button">Bootcut</a>
+<a href="category.html?category=jeans&type=straight" class="w3-bar-item w3-button">Straight</a>
 </div>
-<a href="#" class="w3-bar-item w3-button">Jackets</a>
-<a href="#" class="w3-bar-item w3-button">Gymwear</a>
-<a href="#" class="w3-bar-item w3-button">Blazers</a>
-<a href="#" class="w3-bar-item w3-button">Shoes</a>
+<a href="category.html?category=jackets" class="w3-bar-item w3-button">Jackets</a>
+<a href="category.html?category=gymwear" class="w3-bar-item w3-button">Gymwear</a>
+<a href="category.html?category=blazers" class="w3-bar-item w3-button">Blazers</a>
+<a href="category.html?category=shoes" class="w3-bar-item w3-button">Shoes</a>
 </div>
 <a href="#footer" class="w3-bar-item w3-button w3-padding">Contact</a> 
 <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding" onclick="document.getElementById('newsletter').style.display='block'">Newsletter</a> 
@@ -434,7 +434,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1 class="w3-jumbo w3-hide-small">New arrivals</h1>
 <h1 class="w3-hide-large w3-hide-medium">New arrivals</h1>
 <h1 class="w3-hide-small">COLLECTION 2016</h1>
-<p><a href="#jeans" id="shopnow" class="w3-button w3-black w3-padding-large w3-large">SHOP NOW</a></p>
+<p>
+  <a href="category.html?category=jeans&source=shop_now"
+     id="shopnow"
+     class="w3-button w3-black w3-padding-large w3-large">
+    SHOP NOW
+  </a>
+</p>
 </div>
 </div>
  
@@ -461,7 +467,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <img src="https://www.w3schools.com/w3images/jeans2.jpg" style="width:100%">
 <span class="w3-tag w3-display-topleft">New</span>
 <div class="w3-display-middle w3-display-hover">
-<button id="buynow" class="w3-button w3-black">Buy now <i class="fa fa-shopping-cart"></i></button>
+<a href="product.html?action=buy&product=mega_ripped_jeans"
+   id="buynow"
+   class="w3-button w3-black">
+  Buy now <i class="fa fa-shopping-cart"></i>
+</a>
 </div>
 </div>
 <p>Mega Ripped Jeans<br><b>$19.99</b></p>
@@ -482,7 +492,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <img src="https://www.w3schools.com/w3images/jeans4.jpg" style="width:100%">
 <span class="w3-tag w3-display-topleft">Sale</span>
 <div class="w3-display-middle w3-display-hover">
-<button class="w3-button w3-black">Buy now <i class="fa fa-shopping-cart"></i></button>
+<a href="product.html?action=buy&product=vintage_skinny_jeans"
+   class="w3-button w3-black">
+  Buy now <i class="fa fa-shopping-cart"></i>
+</a>
 </div>
 </div>
 <p>Vintage Skinny Jeans<br><b class="w3-text-red">$14.99</b></p>
