@@ -12,34 +12,36 @@
     .w3-sidebar a {font-family: "Roboto", sans-serif}
     body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
 </style>  
-<!-- OneTrust Cookies Consent Notice start for testinovation-cdp.vercel.app -->
+
+<!-- OneTrust Cookies Consent Notice start -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
-<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"  type="text/javascript" charset="UTF-8" data-domain-script="0195138c-cdc8-738c-907d-131dad8db9ba-test" ></script>
+<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" type="text/javascript" charset="UTF-8" data-domain-script="0195138c-cdc8-738c-907d-131dad8db9ba-test"></script>
 <script type="text/javascript">
 function OptanonWrapper() {
-    // Cookie sync logic - triggers when consent is given
-    initializeCookieSync();
+    // Cookie sync logic is now handled by analytics.js
+    console.log('OneTrust consent updated - analytics.js will handle cookie sync');
 }
 </script> 
-<!-- OneTrust Cookies Consent Notice end for testinovation-cdp.vercel.app -->
+<!-- OneTrust Cookies Consent Notice end -->
 
-<!-- Google Publisher Tag for Cookie Sync -->
-<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
-
+<!-- Adobe Launch -->
 <script src="https://assets.adobedtm.com/e72b4113c11a/dea835227b36/launch-5cc6da518e0d-development.min.js" async></script>
+
+<!-- DataLayer Initialization -->
 <script type="text/javascript">
-    window.dataLayer=window.dataLayer || [];
+    window.dataLayer = window.dataLayer || [];
     dataLayer.push({
-    'pageEnvironment' : 'testPageEnvironment',
-    'pageContentType': 'pageContentType',
-    'pageName':'Homepage',
-    'loggedIn': 'loggedIn',
-    'consentVersion':'consentVersion',
-    'type': 'type',
-    'segment': 'segment',
-    'customerId':'customerId123'
-  })  
+        'pageEnvironment': 'testPageEnvironment',
+        'pageContentType': 'pageContentType',
+        'pageName': 'Homepage',
+        'loggedIn': 'loggedIn',
+        'consentVersion': 'consentVersion',
+        'type': 'type',
+        'segment': 'segment',
+        'customerId': 'customerId123'
+    });
 </script> 
+
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -48,6 +50,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-NPRLPX6Q');</script>
 <!-- End Google Tag Manager -->
 
+<!-- Google Ads -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17484083586"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -55,326 +58,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   gtag('js', new Date());
 </script>
  
-<script type="text/javascript" src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=false&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
+<!-- Analytics.js - All cookie sync and tracking logic is here -->
+<script type="text/javascript" src="https://web-analytics-js5-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com/static/analytics.js?crossdomainflag=true&deleteprofile=true&multiDomainFlag=true&facebookCookieSyncFlag=true&googleCookieSyncFlag=true&automaticTracking=true&domainArray=[%22example.com%22,%22vercel.app%22,%22anotherdomain.com%22]&requiredPurposeIds=[%221%22,%223%22,%224%22]&dataLayer=dataLayer&backendBaseUrl=https%3A%2F%2Fweb-analytics-dot-uxlwqzc-cdip-sandbox-test.uc.r.appspot.com"></script>
 
-
-
-<!-- Cookie Sync Implementation -->
-<script type="text/javascript">
-    window.googletag = window.googletag || {cmd: []};
-    
-    // Cookie Sync Configuration
-    const COOKIE_SYNC_CONFIG = {
-        networkId: '1686285891', // Your DoubleClick network ID
-        enabled: true
-    };
-
-    /**
-     * NEW: Capture GCL (Google Click ID) Cookies
-     * This function reads all Google Ads click tracking cookies
-     */
-    function getGCLCookies() {
-        const gclCookies = {
-            gcl_aw: null,  // Google Ads GCLID
-            gcl_dc: null,  // DoubleClick DCLID
-            gcl_gb: null,  // Google Ads conversion
-            gcl_gf: null,  // Google Ads floodlight
-            gcl_au: null   // Google Analytics auto-generated
-        };
-        
-        try {
-            const cookies = document.cookie.split('; ');
-            
-            cookies.forEach(cookie => {
-                const [name, value] = cookie.split('=');
-                
-                // Check for each GCL cookie type
-                if (name === '_gcl_aw') gclCookies.gcl_aw = value;
-                if (name === '_gcl_dc') gclCookies.gcl_dc = value;
-                if (name === '_gcl_gb') gclCookies.gcl_gb = value;
-                if (name === '_gcl_gf') gclCookies.gcl_gf = value;
-                if (name === '_gcl_au') gclCookies.gcl_au = value;
-            });
-            
-            // Log found GCL cookies
-            console.log('=== GCL Cookies Check ===');
-            let foundAny = false;
-            Object.keys(gclCookies).forEach(key => {
-                if (gclCookies[key]) {
-                    console.log(` Found ${key}:`, gclCookies[key]);
-                    foundAny = true;
-                } else {
-                    console.log(` Not found: ${key}`);
-                }
-            });
-            
-            if (!foundAny) {
-                console.log(' No GCL cookies found. These are set when users click Google Ads.');
-            }
-            
-            return gclCookies;
-            
-        } catch (e) {
-            console.error('[GCL] Error reading GCL cookies:', e);
-            return gclCookies;
-        }
-    }
-
-    /**
-     * NEW: Get User ID from _ga cookie or custom cookie
-     * This is YOUR neutral first-party user ID
-     */
-    function getUserId() {
-    try {
-        const cookie = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('userID='));
-
-        if (!cookie) {
-            console.log('[UserID] userID cookie not found');
-            return null;
-        }
-
-        const value = cookie.split('=').slice(1).join('=');
-        console.log('[UserID] Found userID:', value);
-        return value;
-    } catch (e) {
-        console.error('[UserID] Error reading userID cookie:', e);
-        return null;
-    }
-}
-
-
-    /**
-     * NEW: Send User Identity to Google Ads
-     * This creates the mapping: Your User ID ↔ Google Click ID
-     */
-    function sendUserIdentityToGoogle() {
-        try {
-            const userId = getUserId();
-            const gclCookies = getGCLCookies();
-            
-            // Only proceed if we have user ID and GCL cookies
-            if (!userId) {
-                console.log('Skipping identity sync (no userID)');
-                return;
-            }
-            
-            console.log('🔗 Creating user identity mapping...');
-            console.log('   Your User ID:', userId);
-            console.log('   Google Click ID:', gclCookies.gcl_aw);
-            
-            // Send to Google via dataLayer (requires GTM/gtag.js)
-            if (window.dataLayer) {
-                window.dataLayer.push({
-                    'event': 'user_identity_sync',
-                    'user_id': userId,
-                    'gclid': gclCookies.gcl_aw
-                });
-                console.log(' User identity pushed to dataLayer for Google');
-            }
-            
-            // Optional: Send to your backend for server-side tracking
-            // This is recommended for enhanced privacy and accuracy
-            if (typeof fetch !== 'undefined') {
-                // Uncomment to enable backend sync:
-                /*
-                fetch('/api/user-identity-sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: userId,
-                        gclid: gclCookies.gcl_aw,
-                        gcl_au: gclCookies.gcl_au,
-                        timestamp: new Date().toISOString()
-                    })
-                }).then(() => {
-                    console.log(' User identity sent to backend');
-                }).catch(err => {
-                    console.error(' Failed to send identity to backend:', err);
-                });
-                */
-                console.log(' Tip: Enable backend sync by uncommenting the fetch code');
-            }
-            
-        } catch (e) {
-            console.error('Error sending user identity to Google:', e);
-        }
-    }
-
-    function initializeCookieSync() {
-        if (!COOKIE_SYNC_CONFIG.enabled) {
-            console.log('Cookie sync is disabled');
-            return;
-        }
-
-        // Prevent duplicate initialization
-        if (window.cookieSyncInitialized) {
-            console.log('Cookie sync already initialized, skipping');
-            return;
-        }
-        window.cookieSyncInitialized = true;
-
-        console.log('=== Initializing Cookie Sync (After Consent) ===');
-        
-        // Step 1: Check for GCL cookies
-        const gclCookies = getGCLCookies();
-        
-        // Step 2: Perform cookie sync with DoubleClick
-        performCookieMatchSync();
-        performGPTCookieSync();
-        performIframeCookieSync();
-        
-        // Step 3: Send user identity to Google (maps your User ID ↔ Google Click ID)
-                // === Google Ads Remarketing (Audience Growth) ===
-        try {
-            const userId = getUserId(); // reads userID cookie
-        
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){ dataLayer.push(arguments); }
-        
-            // Load Google Ads tag once
-        
-            // Fire remarketing hit (THIS grows the audience)
-            gtag('js', new Date());
-            gtag('config', 'AW-17484083586', {
-                user_id: userId || undefined
-            });
-        
-            console.log('[Google Ads] Remarketing tag fired', userId);
-        } catch (e) {
-            console.error('[Google Ads] Remarketing failed', e);
-        }
-
-        
-        console.log('=== Cookie Sync Complete ===');
-    }
-
-    function performCookieMatchSync() {
-        try {
-            const networkId = COOKIE_SYNC_CONFIG.networkId;
-            const syncUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${networkId}&google_cm=1&google_hm=${Date.now()}`;
-            
-            const img = new Image();
-            img.style.display = 'none';
-            img.width = 1;
-            img.height = 1;
-            
-            img.onload = function() {
-                console.log(' Cookie match sync successful');
-            };
-            
-            img.onerror = function() {
-                console.warn(' Cookie match sync blocked by browser (this is normal with privacy features enabled)');
-            };
-            
-            img.src = syncUrl;
-            document.body.appendChild(img);
-            
-        } catch (error) {
-            console.error('Error in cookie match sync:', error);
-        }
-    }
-
-    function performGPTCookieSync() {
-        try {
-            const networkId = COOKIE_SYNC_CONFIG.networkId;
-            const testAdUnit = `/${networkId}/cookie_sync`;
-            
-            googletag.cmd.push(function() {
-                try {
-                    // Check if slot already exists before creating
-                    const existingSlots = googletag.pubads().getSlots();
-                    const slotExists = existingSlots.some(function(s) {
-                        return s.getSlotElementId() === 'gpt-cookie-sync-div';
-                    });
-                    
-                    if (slotExists) {
-                        console.log('GPT cookie sync slot already exists, skipping');
-                        return;
-                    }
-                    
-                    // Create a 1x1 ad slot for cookie syncing
-                    const slot = googletag.defineSlot(testAdUnit, [1, 1], 'gpt-cookie-sync-div');
-                    
-                    if (slot) {
-                        slot.addService(googletag.pubads());
-                        
-                        googletag.pubads().addEventListener('slotRenderEnded', function(event) {
-                            if (event.slot === slot) {
-                                console.log(' GPT cookie sync completed');
-                            }
-                        });
-
-                        googletag.enableServices();
-                        googletag.display(slot);
-                    }
-                } catch (error) {
-                    console.warn(' GPT cookie sync skipped (this is normal if Network ID is not configured in Ad Manager):', error.message);
-                }
-            });
-        } catch (error) {
-            console.error('Error in GPT cookie sync:', error);
-        }
-    }
-
-    function performIframeCookieSync() {
-        try {
-            const networkId = COOKIE_SYNC_CONFIG.networkId;
-            const syncUrl = `https://cm.g.doubleclick.net/pixel?google_nid=${networkId}&google_cm=1`;
-            
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.style.width = '1px';
-            iframe.style.height = '1px';
-            iframe.style.position = 'absolute';
-            iframe.style.top = '-9999px';
-            iframe.style.left = '-9999px';
-            
-            iframe.onload = function() {
-                console.log(' Iframe cookie sync loaded');
-                // Remove iframe after sync
-                setTimeout(function() {
-                    if (iframe.parentNode) {
-                        iframe.parentNode.removeChild(iframe);
-                    }
-                }, 3000);
-            };
-            
-            iframe.onerror = function() {
-                console.warn(' Iframe cookie sync blocked by browser');
-                if (iframe.parentNode) {
-                    iframe.parentNode.removeChild(iframe);
-                }
-            };
-            
-            iframe.src = syncUrl;
-            document.body.appendChild(iframe);
-            
-        } catch (error) {
-            console.error('Error in iframe cookie sync:', error);
-        }
-    }
-
-    // Also trigger on page load if consent already given
-    window.addEventListener('load', function() {
-        // Check if OneTrust consent exists
-        setTimeout(function() {
-            if (typeof OnetrustActiveGroups !== 'undefined') {
-                initializeCookieSync();
-            }
-        }, 1000);
-    });
-</script>
 </head>
 <body class="w3-content" style="max-width:1200px">
+
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NPRLPX6Q"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-
-<!-- Hidden div for GPT cookie sync -->
-<div id="gpt-cookie-sync-div" style="display: none; width: 1px; height: 1px; position: absolute; top: -9999px; left: -9999px;"></div>
 
 <!-- Sidebar/menu -->
 <nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top" style="z-index:3;width:250px" id="mySidebar">
@@ -401,7 +94,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 <a href="#footer" class="w3-bar-item w3-button w3-padding">Contact</a> 
 <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding" onclick="document.getElementById('newsletter').style.display='block'">Newsletter</a> 
-<a href="#footer"  class="w3-bar-item w3-button w3-padding">Subscribe</a>
+<a href="#footer" class="w3-bar-item w3-button w3-padding">Subscribe</a>
 </nav>
  
 <!-- Top menu on small screens -->
@@ -418,6 +111,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
  
   <!-- Push down content on small screens -->
 <div class="w3-hide-large" style="margin-top:83px"></div>
+
 <!-- Top header -->
 <header class="w3-container w3-xlarge">
 <p class="w3-left">Jeans</p>
@@ -521,6 +215,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <p><input class="w3-input w3-border" type="text" placeholder="Enter e-mail" style="width:100%"></p>
 <button type="button" class="w3-button w3-red w3-margin-bottom">Subscribe</button>
 </div>
+
 <!-- Footer -->
 <footer class="w3-padding-64 w3-light-grey w3-small w3-center" id="footer">
 <div class="w3-row-padding">
@@ -561,7 +256,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <br>
 <a href="https://clickstromtest.vercel.app/">https://clickstromtest.vercel.app</a> <br></br>
 <a href="https://development-site-three.vercel.app/">https://development-site-three.vercel.app</a> <br></br>
-<a href = "https://www.facebook.com/" class="fa fa-facebook-official w3-hover-opacity w3-large"></a>
+<a href="https://www.facebook.com/" class="fa fa-facebook-official w3-hover-opacity w3-large"></a>
 <i class="fa fa-instagram w3-hover-opacity w3-large"></i>
 <i class="fa fa-snapchat w3-hover-opacity w3-large"></i>
 <i class="fa fa-pinterest-p w3-hover-opacity w3-large"></i>
@@ -607,17 +302,17 @@ function myAccFunc() {
 // Click on the "Jeans" link on page load to open the accordion for demo purposes
 document.getElementById("myBtn").click();
  
- 
 // Open and close sidebar
 function w3_open() {
   document.getElementById("mySidebar").style.display = "block";
   document.getElementById("myOverlay").style.display = "block";
 }
+
 function w3_close() {
   document.getElementById("mySidebar").style.display = "none";
   document.getElementById("myOverlay").style.display = "none";
 }
- 
 </script>
+
 </body>
 </html>
